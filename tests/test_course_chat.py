@@ -205,3 +205,47 @@ def test_card_warns_when_delivery_mode_differs_from_request(db, make_user):
     in_person = add_course(db, make_user("teacher"), "聊天測試實體課", delivery_mode="in_person", region="台北市大安區")
 
     assert course_chat._warnings([], in_person, {"delivery_mode": "online"}) == ["這門是實體課，不是你說的線上"]
+
+
+def test_starters_return_three_random_active_questions(db):
+    from backend.models.course_chat_starter import CourseChatStarter
+
+    db.query(CourseChatStarter).delete()
+    for index in range(5):
+        db.add(CourseChatStarter(text=f"測試推薦問題 {index}", category="course_search", is_active=True))
+    db.add(CourseChatStarter(text="驗證沒過的問題", category="course_search", is_active=False))
+    db.commit()
+
+    client = TestClient(app)
+    seen = set()
+    for _ in range(12):
+        response = client.get("/api/course-chat/starters")
+        assert response.status_code == 200
+        texts = [item["text"] for item in response.json()]
+        assert len(texts) == 3 and len(set(texts)) == 3
+        assert "驗證沒過的問題" not in texts
+        seen.update(texts)
+    # 隨機：多問幾次會看到不只 3 句
+    assert len(seen) > 3
+
+
+def test_starters_empty_when_none_verified(db):
+    from backend.models.course_chat_starter import CourseChatStarter
+
+    db.query(CourseChatStarter).delete()
+    db.commit()
+    assert TestClient(app).get("/api/course-chat/starters").json() == []
+
+
+def test_starters_pick_one_from_each_category(db):
+    from backend.models.course_chat_starter import CourseChatStarter
+
+    db.query(CourseChatStarter).delete()
+    for category, count in (("course_search", 6), ("criteria", 2), ("platform_howto", 2)):
+        for index in range(count):
+            db.add(CourseChatStarter(text=f"{category} {index}", category=category, is_active=True))
+    db.commit()
+
+    for _ in range(10):
+        categories = [item["category"] for item in TestClient(app).get("/api/course-chat/starters").json()]
+        assert sorted(categories) == ["course_search", "criteria", "platform_howto"]

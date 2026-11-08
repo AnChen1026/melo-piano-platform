@@ -2,7 +2,7 @@
 import { computed, nextTick, onBeforeUnmount, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 
-import { sendCourseChat, type ChatCourse } from '@/api/courseChat'
+import { getCourseChatStarters, sendCourseChat, type ChatCourse, type ChatStarter } from '@/api/courseChat'
 import { deliveryText, priceText } from '@/utils/format'
 
 interface ChatMessage { role: 'assistant' | 'user'; text: string; courses?: ChatCourse[] }
@@ -41,11 +41,32 @@ function stopStages() {
 
 onBeforeUnmount(stopStages)
 
+// 推薦問題：沒頭緒時點一下就送出。拿不到（例如還沒驗證任何問題）就不顯示
+const starters = ref<ChatStarter[]>([])
+const startersLoading = ref(false)
+
+async function loadStarters() {
+  startersLoading.value = true
+  try {
+    starters.value = await getCourseChatStarters()
+  } catch {
+    starters.value = []
+  } finally {
+    startersLoading.value = false
+  }
+}
+
+function askStarter(text: string) {
+  input.value = text
+  submit()
+}
+
 const canSubmit = computed(() => input.value.trim().length > 0 && !loading.value)
 const started = computed(() => messages.value.length > 1)
 
 async function toggle() {
   open.value = !open.value
+  if (open.value && !started.value && !starters.value.length) loadStarters()
   if (open.value) await nextTick(() => inputElement.value?.focus())
 }
 
@@ -89,6 +110,7 @@ function restart() {
   error.value = ''
   input.value = ''
   messages.value = [{ role: 'assistant', text: GREETING }]
+  loadStarters()
   nextTick(() => inputElement.value?.focus())
 }
 </script>
@@ -119,6 +141,20 @@ function restart() {
               </article>
             </div>
           </template>
+          <div v-if="!started && starters.length" class="starters">
+            <p class="starters__label">不知道從哪裡問起？試試：</p>
+            <button
+              v-for="starter in starters"
+              :key="starter.text"
+              type="button"
+              class="starter"
+              :disabled="loading"
+              @click="askStarter(starter.text)"
+            >
+              {{ starter.text }}
+            </button>
+            <button type="button" class="starters__more" :disabled="startersLoading" @click="loadStarters">換一組</button>
+          </div>
           <p v-if="loading" class="message message--assistant message--pending">
             <span class="typing" aria-hidden="true"><i /><i /><i /></span>{{ stage }}
           </p>
@@ -170,6 +206,12 @@ function restart() {
 .typing i:nth-child(3) { animation-delay: .3s; }
 @keyframes typing { 0%, 60%, 100% { opacity: .25; transform: translateY(0); } 30% { opacity: 1; transform: translateY(-3px); } }
 @media (prefers-reduced-motion: reduce) { .typing i { animation: none; opacity: .6; } }
+.starters { display: grid; gap: 7px; justify-items: start; margin: 4px 0 2px; }
+.starters__label { margin: 0; color: var(--home-muted); font-size: 12px; }
+.starter { max-width: 100%; padding: 8px 12px; border: 1px solid var(--home-line); border-radius: var(--radius-pill); background: #fff; color: var(--home-ink); font: inherit; font-size: 13px; text-align: left; cursor: pointer; }
+.starter:hover:not(:disabled) { border-color: var(--home-accent); color: var(--home-accent); }
+.starters__more { padding: 2px 0; border: 0; background: transparent; color: var(--home-accent); font-size: 12px; font-weight: 600; cursor: pointer; }
+.starter:disabled, .starters__more:disabled { cursor: default; opacity: .5; }
 .results { display: grid; gap: 10px; margin: 2px 0 6px; }
 .course-card { padding: 14px; border: 1px solid var(--home-line); border-radius: 14px; background: #fff; }
 .course-card h3, .course-card p { margin: 0 0 5px; }

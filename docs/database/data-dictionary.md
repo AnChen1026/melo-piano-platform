@@ -36,7 +36,7 @@
   → 020 course embeddings
 ```
 
-`015` 之後有兩次分支，由 `017_merge_storage_audio` 與 `018_merge_availability_storage` 合併。目前只有一個 head：`020_course_embeddings`。所有資料表的用途見 `docs/資料表設計.md`，這裡只寫需要細節的表。
+`015` 之後有兩次分支，由 `017_merge_storage_audio` 與 `018_merge_availability_storage` 合併。目前只有一個 head：`025_course_chat_starters`。所有資料表的用途見 `docs/資料表設計.md`，這裡只寫需要細節的表。
 
 ## `recommendation_sessions`
 
@@ -125,6 +125,8 @@
 
 ## `course_embeddings`
 
+**已由 `rag_documents` 取代（`024`），保留一個版本後刪除，程式不再讀寫。**
+
 一門課一筆語意向量，只用來排序已篩好的已發布課程。課程事實仍以 `courses` 為準。
 
 | 欄位 | 可空 | 說明 |
@@ -134,6 +136,34 @@
 | `content_hash` | 否 | 課程內容雜湊。課程編輯後舊向量失效，需重跑索引工具 |
 | `embedding` | 否 | 向量（JSONB） |
 | `updated_at` | 否 | 更新時間 |
+
+## `rag_documents`
+
+AI 找課檢索用的 pgvector 向量（`024_pgvector_rag`）。課程一門一筆（不切塊）；`source_type = 'platform_guide'` 預留給平台說明，目前沒有使用。課程事實仍以 `courses` 為準。
+
+| 欄位 | 可空 | 說明 |
+| --- | --- | --- |
+| `source_type` | 否 | `course` 或 `platform_guide`，和下面兩欄的組合由 check constraint 限制 |
+| `course_id` | 是 | 課程（`course` 時必填，課程刪除時一起刪） |
+| `source_key` | 是 | 平台說明的代號（`platform_guide` 時必填） |
+| `chunk_index` | 否 | 切塊序號，目前都是 0 |
+| `title`、`content` | 否 | 建向量用的文字 |
+| `content_hash` | 否 | 內容雜湊。課程編輯後舊向量失效，需重跑 `scripts.index_course_embeddings` |
+| `model_version` | 否 | bge-m3 的 digest，和設定不同時不使用 |
+| `embedding` | 否 | `extensions.vector(1024)`，HNSW 餘弦索引 `ix_rag_documents_embedding` |
+| `updated_at` | 否 | 更新時間 |
+
+## `course_chat_starters`
+
+AI 找課的推薦開場問題（`025`）。由 `scripts.chat_starters` 從 `scripts/data/chat_starters.json` 匯入，並用網站的檢索驗證；沒通過的 `is_active = false`。
+
+| 欄位 | 可空 | 說明 |
+| --- | --- | --- |
+| `text` | 否 | 問題文字，唯一 |
+| `category` | 否 | `course_search`、`criteria`、`platform_howto`，API 每類隨機挑一句 |
+| `is_active` | 否 | 驗證通過才為 true |
+| `verified_at`、`verified_model_version`、`top_score` | 是 | 最近一次驗證的時間、模型版本與最高相似度 |
+| `check_note` | 否 | 驗證結果說明 |
 
 ## `storage_cleanup_jobs`
 

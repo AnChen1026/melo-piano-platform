@@ -54,4 +54,4 @@ PostgreSQL 使用同一個唯讀 snapshot 備份 `public` schema、資料、資�
 
 ## CI 與 schema 升級
 
-CI／PR 合併順序見 [CI 與 PR 手冊](ci-and-pr.md)。備份欄位契約（`scripts/ops/database_refs.py`）明確支援 `016_storage_cleanup` 到 `020_course_embeddings`；`017_merge_storage_audio` 起納入 `practice_feedbacks.score_sheet_path`。未知 revision 或多個 migration head 會拒絕備份，避免漏驗檔案引用。升級其他 schema 前需先更新此契約。
+CI／PR 合併順序見 [CI 與 PR 手冊](ci-and-pr.md)。備份欄位契約（`scripts/ops/database_refs.py`）明確支援 `016_storage_cleanup` 到 `025_course_chat_starters`；`017_merge_storage_audio` 起納入 `practice_feedbacks.score_sheet_path`。未知 revision 或多個 migration head 會拒絕備份，避免漏驗檔案引用。升級其他 schema 前需先更新此契約。

@@ -46,7 +46,8 @@ def parse_conversation(messages: list[dict]) -> dict | None:
                 ],
                 "max_tokens": MAX_TOKENS,
                 "temperature": 0,
-                "response_format": {"type": "json_object"},
+                # 不加 response_format：Ollama 的 JSON 限制解碼會擋掉模型學到的第一個 token「{"」，
+                # 微調模型因此偏離訓練分布、多輸出欄位（P6 實測合格率 0%）。格式由 parse_output 檢查。
             },
             timeout=TIMEOUT_SECONDS,
         )

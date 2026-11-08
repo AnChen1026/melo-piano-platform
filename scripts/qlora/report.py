@@ -18,8 +18,10 @@ from backend.course_parser_spec import CRITERIA_FIELDS, InvalidParse, parse_outp
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "docs/ai-course-finder/training"
-METHODS = {"rules": "規則解析（原本）", "base": "原始千問 4B", "adapter": "微調千問 4B"}
-COLORS = {"rules": "#9aa3ad", "base": "#e0a23a", "adapter": "#2f6fde"}
+METHODS = {"rules": "規則解析（原本）", "base": "原始千問 4B", "adapter": "微調千問 4B（MLX）"}
+COLORS = {"rules": "#9aa3ad", "base": "#e0a23a", "adapter": "#2f6fde", "ollama_ft": "#1f9d74"}
+# P6 轉成 Ollama int4 後的預測；檔案存在才一起比較
+OPTIONAL_METHODS = {"ollama_ft": "微調千問 4B（Ollama int4，上線版）"}
 
 
 def read_jsonl(path):
@@ -124,7 +126,7 @@ def plot_losses(metrics, summary):
     fig, ax = plt.subplots(figsize=(10, 5.2))
     ax.plot([r["step"] for r in reports], [r["train_loss"] for r in reports], color="#9aa3ad", linewidth=1,
             label="train（每 10 步的批次平均）")
-    for name, color, label in (("train", "#555", "train（固定 100 筆）"), ("valid", "#2f6fde", "valid（選權重用）"),
+    for name, color, label in (("train", "#555", f"train（固定抽 {summary['config']['train_eval_size']} 筆）"), ("valid", "#2f6fde", "valid（選權重用）"),
                                ("test", "#e0623a", "test（只記錄，不參與選擇）")):
         ax.plot([r["step"] for r in evals], [r[name] for r in evals], marker="o", markersize=4, color=color, label=label)
     ax.axvline(best, color="#2f6fde", linestyle="--", linewidth=1)
@@ -187,16 +189,17 @@ def plot_accuracy(results):
     fig, axes = plt.subplots(2, 1, figsize=(12, 8))
     for ax, dataset, title in ((axes[0], "synthetic_test", "合成 test（主題沒在訓練出現過）"),
                                (axes[1], "handwritten", "人工撰寫 test（句型也沒看過）")):
-        width = 0.27
-        for offset, method in zip((-width, 0, width), METHODS):
+        width = 0.8 / len(METHODS)
+        offsets = [(i - (len(METHODS) - 1) / 2) * width for i in range(len(METHODS))]
+        for offset, method in zip(offsets, METHODS):
             values = [results[method][dataset][key] for key, _ in metrics]
             bars = ax.bar([i + offset for i in range(len(metrics))], values, width, label=METHODS[method], color=COLORS[method])
             ax.bar_label(bars, labels=[f"{v:.0%}" for v in values], fontsize=7)
         ax.set_xticks(range(len(metrics)), [label for _, label in metrics])
-        ax.set_ylim(0, 1.12)
+        ax.set_ylim(0, 1.25)
         n = results["adapter"][dataset]["n"]
         ax.set_title(f"{title}，{n} 句")
-        ax.legend(loc="lower right", fontsize=8)
+        ax.legend(loc="upper center", ncol=4, fontsize=8, frameon=False)
     fig.tight_layout()
     fig.savefig(OUT / "task_accuracy.png", dpi=160)
     plt.close(fig)
@@ -211,7 +214,10 @@ def main():
     summary = json.loads((OUT / f"{args.run}_summary.json").read_text())
     plot_losses(metrics, summary)
 
-    rows = {name: read_jsonl(OUT / f"predictions_{name}.jsonl") for name in ("base", "adapter")}
+    for name, label in OPTIONAL_METHODS.items():
+        if (OUT / f"predictions_{name}.jsonl").exists():
+            METHODS[name] = label
+    rows = {name: read_jsonl(OUT / f"predictions_{name}.jsonl") for name in METHODS if name != "rules"}
     cases = rows["adapter"]
     preds = {name: parsed_predictions(rows[name]) for name in rows}
     preds["rules"] = [rules_parse(case) for case in cases]

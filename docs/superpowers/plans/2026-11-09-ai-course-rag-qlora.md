@@ -1,6 +1,6 @@
 # AI 找課改造計畫：QLoRA 微調、pgvector RAG、聊天式找課、推薦問題
 
-> 狀態：**已確認，實作中**（2026-11-09）　P0 ✅　P1 ✅（雲端待部署）　P2 ✅　P3 ✅　P4 ✅（題庫待審）　P5 下一步
+> 狀態：**已確認，實作中**（2026-11-09）　P0 ✅　P1 ✅（雲端待部署）　P2 ✅　P3 ✅　P4 ✅　P5 ✅　P6 ✅（共用閘道待管理員開放模型）　P7 進行中
 > 開發紀錄：[docs/ai-course-finder/開發紀錄.md](../../ai-course-finder/開發紀錄.md)
 > 分支：`feature/ai-course-rag-qlora`（從 `main` b94fc26 開出，已含 PR #48）
 > 參考：

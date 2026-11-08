@@ -5,7 +5,7 @@
 - MLX-LM 0.32.2 的預設 loss 右邊界多算一個 padding，這裡用半開區間 [答案起點, 真實長度)
 - 只用 valid loss 選最佳權重，test 不參與選擇
 
-和該專案不同的地方：每次評估同時算 train（固定 100 筆）、valid、test 三組 loss，
+和該專案不同的地方：每次評估同時算 train（固定抽 train_eval_size 筆）、valid、test 三組 loss，
 三條曲線才能畫在同一張圖上觀察過擬合。test loss 只記錄、不用來選權重。
 
 需在裝有 MLX 的環境執行（.scratch/qwen-lora/venv），在專案根目錄：

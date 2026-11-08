@@ -1,0 +1,176 @@
+{
+  "run": "parser-r8",
+  "config": {
+    "run_name": "parser-r8",
+    "seed": 42,
+    "batch_size": 4,
+    "eval_batch_size": 8,
+    "iters": 400,
+    "learning_rate": 0.0001,
+    "num_layers": 16,
+    "max_seq_length": 1024,
+    "steps_per_report": 10,
+    "steps_per_eval": 50,
+    "train_eval_size": 60,
+    "lora_parameters": {
+      "rank": 8,
+      "scale": 16.0,
+      "dropout": 0.05,
+      "keys": [
+        "self_attn.q_proj",
+        "self_attn.v_proj"
+      ]
+    }
+  },
+  "model": ".scratch/qwen-lora/model",
+  "model_manifest": "mlx-community/Qwen3-4B-Instruct-2507-4bit",
+  "python": "3.12.10",
+  "versions": {
+    "mlx": "0.32.4",
+    "mlx-lm": "0.32.2",
+    "transformers": "5.22.1",
+    "numpy": "2.5.4"
+  },
+  "train_seconds": 6564.820969291002,
+  "peak_memory_gb": 4.739924816,
+  "trainable_parameters": 1310720,
+  "total_parameters": 629986816,
+  "base_losses": {
+    "train": 2.0951895713806152,
+    "valid": 2.0687246322631836,
+    "test": 2.060533046722412
+  },
+  "best_step": 400,
+  "best_valid_loss": 0.02946282923221588,
+  "token_lengths": {
+    "train": {
+      "max_tokens": 502,
+      "mean_tokens": 473.0,
+      "rows": 900
+    },
+    "train_eval": {
+      "max_tokens": 500,
+      "mean_tokens": 472.7,
+      "rows": 60
+    },
+    "valid": {
+      "max_tokens": 499,
+      "mean_tokens": 470.6166666666667,
+      "rows": 120
+    },
+    "test": {
+      "max_tokens": 499,
+      "mean_tokens": 472.4533333333333,
+      "rows": 150
+    }
+  },
+  "data_summary": {
+    "seed": 42,
+    "splits": {
+      "train": {
+        "rows": 900,
+        "themes": 56,
+        "kinds": {
+          "criteria_only": 108,
+          "topic": 446,
+          "off_topic": 17,
+          "platform": 14,
+          "dialogue_topic_switch": 36,
+          "dialogue_platform_after": 22,
+          "dialogue_answer": 135,
+          "dialogue_correction": 35,
+          "dialogue_clear_budget": 24,
+          "generic": 5,
+          "dialogue_off_topic_after": 21,
+          "dialogue_follow_up": 37
+        },
+        "intents": {
+          "course_search": 826,
+          "off_topic": 38,
+          "platform_howto": 36
+        },
+        "sha256": "225b0100421dba30ea156b37e1ae021cb52333b7d943cd95dfd8e7a9bea833af"
+      },
+      "valid": {
+        "rows": 120,
+        "themes": 12,
+        "kinds": {
+          "topic": 66,
+          "platform": 3,
+          "dialogue_topic_switch": 3,
+          "dialogue_answer": 10,
+          "dialogue_correction": 5,
+          "dialogue_platform_after": 2,
+          "off_topic": 4,
+          "criteria_only": 11,
+          "dialogue_clear_budget": 4,
+          "dialogue_off_topic_after": 4,
+          "dialogue_follow_up": 5,
+          "generic": 3
+        },
+        "intents": {
+          "course_search": 107,
+          "platform_howto": 5,
+          "off_topic": 8
+        },
+        "sha256": "d973b4947f772febce17d8a9e97527ca992f7b234a885687fa8c3b73aac934b2"
+      },
+      "test": {
+        "rows": 150,
+        "themes": 12,
+        "kinds": {
+          "dialogue_topic_switch": 6,
+          "topic": 77,
+          "off_topic": 3,
+          "criteria_only": 12,
+          "dialogue_answer": 22,
+          "dialogue_follow_up": 6,
+          "platform": 3,
+          "dialogue_correction": 5,
+          "dialogue_off_topic_after": 4,
+          "dialogue_platform_after": 4,
+          "generic": 4,
+          "dialogue_clear_budget": 4
+        },
+        "intents": {
+          "course_search": 136,
+          "off_topic": 7,
+          "platform_howto": 7
+        },
+        "sha256": "fb99d8658f06dc228a9f802f95b8051ad559608f07234682542a9f2989e6b91c"
+      }
+    },
+    "test_themes": [
+      "intro-19",
+      "advanced-05",
+      "intermediate-15",
+      "advanced-12",
+      "intro-10",
+      "advanced-14",
+      "advanced-18",
+      "beginner-09",
+      "beginner-12",
+      "beginner-16",
+      "advanced-04",
+      "advanced-15"
+    ],
+    "valid_themes": [
+      "beginner-07",
+      "beginner-15",
+      "intermediate-05",
+      "intermediate-02",
+      "intermediate-06",
+      "advanced-13",
+      "intro-18",
+      "intro-09",
+      "intro-05",
+      "beginner-10",
+      "beginner-08",
+      "intro-12"
+    ],
+    "overlap_inputs": {
+      "train_valid": 4,
+      "train_test": 4
+    }
+  }
+}

@@ -299,6 +299,16 @@ uv run python -m scripts.index_course_embeddings --apply --confirm-database aipe
 
 ✅ 跑完沒有紅色錯誤，最後一行是 `indexed=` 和 `published=` 一樣的數字就對了。想再確認一次，可以重跑上面的試跑指令，看到 `pending=0` 代表全部建好。
 
+向量存在資料庫的 pgvector（`rag_documents` 表）。第一次 pull 到這個版本時，`docker compose up --build -d` 會把資料庫換成內建 pgvector 的映像，資料不會消失。
+
+### 3-9b ③ AI 找課：放入推薦問題
+同一個視窗（剛剛的 `export` 還在）：
+```bash
+uv run python -m scripts.chat_starters --apply --confirm-database aipe04
+```
+
+✅ 最後一行 `passed=29/30 mode=apply` 就對了。每一題都用網站的檢索實際跑過，沒找到課的會自動停用。課程或索引改過要重跑。
+
 ### 3-10 ③ AI 找課：試用
 - [ ] 打開 <http://localhost>，按右下角 **AI 找課**，打「我完全沒學過，想自彈自唱流行歌」。
 
@@ -340,6 +350,7 @@ uv run python -m scripts.index_course_embeddings --apply --confirm-database aipe
 | 錄音一直「分析中」 | 後端在算或出錯 | 等 1 分鐘；還是不行看 `docker compose logs backend --tail 50` |
 | 練習回饋文字很短、像制式句子 | 沒有連到 AI，改用備用說明 | 路線 A 看 2-4、路線 B 看 3-7 |
 | AI 找課沒有反應或照一般搜尋 | 閘道、模型名稱、版本號或索引有一項沒好 | 依序檢查 3-2（名字一模一樣）、3-5、3-8、3-9 |
+| AI 找課聊天視窗沒有推薦問題 | 還沒放入推薦問題 | 做 3-9b |
 | 改了 `.env` 好像沒用 | 後端還在用舊設定 | `docker compose up -d --force-recreate backend` |
 
 ---
@@ -371,8 +382,27 @@ uv run python -m scripts.index_course_embeddings --apply --confirm-database aipe
 
 ---
 
+## AI 找課改用微調過的需求解析（選做）
+
+AI 找課預設用規則整理學生的需求。也可以改用 QLoRA 微調過的千問 4B，比較看得懂「一千二」「下班後」這類說法，也會分辨學生是在找課、問平台怎麼用，還是聊無關的事。訓練過程與成果見 [開發紀錄](ai-course-finder/開發紀錄.md)。
+
+需要 Apple Silicon 的 Mac（訓練用 MLX），以及已訓練好的權重 `.scratch/qwen-lora/runs/parser-r8/best_adapter`（沒有的話照開發紀錄 P5 重新訓練，約 1 小時）。
+
+1. 匯入 Ollama（約 10 分鐘，中間會用掉約 8GB 硬碟，結束會自動刪除）：
+   ```bash
+   PYTHONPATH=. .scratch/qwen-lora/venv/bin/python -m scripts.qlora.export_ollama --run parser-r8
+   ```
+   ✅ `ollama list` 看得到 `melo-qwen3-4b-ft`。
+2. 閘道開放這個模型：在 **3-5** 的指令，`uv run` 那行前面多加
+   `export AI_GATEWAY_CHAT_MODELS="qwen3:4b-instruct-2507-q4_K_M,melo-qwen3-4b-ft"`
+3. `.env` 加上 `COURSE_PARSER_LLM_MODEL=melo-qwen3-4b-ft`，然後 `docker compose up -d --force-recreate backend`。
+
+不想用了，把 `COURSE_PARSER_LLM_MODEL` 清空再重建後端即可，會回到規則解析。
+
+---
+
 ## 補充：這些設定在做什麼（看不懂可以跳過）
 
 - 後端呼叫 AI 都經過 `backend/services/llm.py`：看 `<功能>_LLM_PROVIDER` 決定用 `openai`、`gemini` 或 `local`（本機閘道）。AI 出題沒設定時預設用 OpenAI；課前摘要跟著 `LLM_PROVIDER`。
 - 本機模型一次能讀、能寫的字數有限，所以 AI 出題會分批，每批 4 題。出題在背景跑，完成後老師在作業選單看到通知，審查時可以改答案。
-- AI 找課用的是同一個閘道，細節在 [shared-local-ai.md](shared-local-ai.md)。現在是聊天顧問：先檢索最相關的課程，再讓模型只根據這些課程回答，回覆走 `COURSE_CHAT_LLM_PROVIDER`（沒設就跟 `LLM_PROVIDER`）。設計見 [ADR 0011](adr/0011-ai-course-chat.md)。
+- AI 找課用的是同一個閘道，細節在 [shared-local-ai.md](shared-local-ai.md)。現在是聊天顧問：先檢索最相關的課程，再讓模型只根據這些課程回答，回覆走 `COURSE_CHAT_LLM_PROVIDER`（沒設就跟 `LLM_PROVIDER`）。設計見 [ADR 0011](adr/0011-ai-course-chat.md)、[ADR 0012](adr/0012-pgvector-rag-and-fine-tuned-parser.md)，流程說明在 [AI找課聊天說明](AI找課聊天說明.md)。

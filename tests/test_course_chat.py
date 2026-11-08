@@ -249,3 +249,52 @@ def test_starters_pick_one_from_each_category(db):
     for _ in range(10):
         categories = [item["category"] for item in TestClient(app).get("/api/course-chat/starters").json()]
         assert sorted(categories) == ["course_search", "criteria", "platform_howto"]
+
+
+def parsed(intent="course_search", query="", **criteria):
+    return {"intent": intent, "level": None, "delivery_mode": None, "region": None, "max_price": None,
+            "time_slot": None, **criteria, "search_query": query}
+
+
+def test_fine_tuned_parser_query_and_criteria_drive_retrieval(db, make_user, fake_model, monkeypatch):
+    seen = {}
+
+    def retrieve(db, said, criteria, k, query=None):
+        seen.update(criteria=criteria, query=query)
+        return Retrieval([], {}, set(), "ready", False, None)
+
+    monkeypatch.setattr(course_chat, "parse_conversation", lambda messages: parsed(query="兒童鋼琴檢定", region="台中市"))
+    monkeypatch.setattr(course_chat, "retrieve_courses", retrieve)
+
+    assert ask("想準備兒童鋼琴檢定，在台中").status_code == 200
+    assert seen["query"] == "兒童鋼琴檢定"
+    # 曲風不再當硬條件：「兒童」只出現在檢索主題，不會變成 style 篩選
+    assert seen["criteria"]["region"] == "台中市" and "style" not in seen["criteria"]
+
+
+@pytest.mark.parametrize(("intent", "note"), [("platform_howto", "PLATFORM_NOTE"), ("off_topic", "GATED_NOTE")])
+def test_platform_and_off_topic_skip_course_search(db, make_user, fake_model, monkeypatch, intent, note):
+    calls, _state = fake_model
+    monkeypatch.setattr(course_chat, "parse_conversation", lambda messages: parsed(intent=intent))
+    monkeypatch.setattr(course_chat, "retrieve_courses", lambda *a, **kw: pytest.fail("不該找課"))
+
+    response = ask("怎麼約課？")
+
+    assert response.status_code == 200 and response.json()["courses"] == []
+    assert getattr(course_chat, note) in calls[0]["system"]
+
+
+def test_parser_failure_falls_back_to_rules(db, make_user, fake_model, monkeypatch):
+    seen = {}
+
+    def retrieve(db, said, criteria, k, query=None):
+        seen.update(criteria=criteria, query=query)
+        return Retrieval([], {}, set(), "ready", False, None)
+
+    monkeypatch.setattr(course_chat, "parse_conversation", lambda messages: None)
+    monkeypatch.setattr(course_chat, "retrieve_courses", retrieve)
+
+    ask("想找台中的課，一堂 1000 元以內")
+
+    assert seen["query"] is None
+    assert seen["criteria"] == {"region": "台中市", "max_price": 1000}

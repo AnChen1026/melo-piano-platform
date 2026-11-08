@@ -1,7 +1,7 @@
 {
- "reviewed": false,
- "reviewed_by": null,
- "note": "Claude 草擬（2026-11-09），Ollie 審過後把 reviewed 改成 true 才能寫入資料庫",
+ "reviewed": true,
+ "reviewed_by": "Ollie（2026-11-09 在對話中確認）",
+ "note": "Claude 草擬、Ollie 審核。修改題目後要重跑 scripts.chat_starters --apply",
  "starters": [
   {
    "text": "我是成人零基礎，想從頭學鋼琴",

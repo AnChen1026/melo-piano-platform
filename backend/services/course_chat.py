@@ -9,9 +9,11 @@ import re
 
 from sqlalchemy.orm import Session
 
+from backend.course_parser_spec import CRITERIA_FIELDS
 from backend.models.student import Course
 from backend.services import llm
-from backend.services.rag_retrieval import retrieve_courses
+from backend.services.ai_course_parser import parse_conversation
+from backend.services.rag_retrieval import Retrieval, retrieve_courses
 from backend.services.recommendation import parse_criteria
 
 logger = logging.getLogger(__name__)
@@ -19,6 +21,7 @@ logger = logging.getLogger(__name__)
 FEATURE_COURSE_CHAT = "course_chat"
 # 交給模型參考的課程數。太多會超過本機模型讀得下的長度
 CANDIDATE_COUNT = 6
+PLATFORM_NOTE = "（這次沒有附上課程：學生在問平台怎麼使用，請根據「平台說明」回答；說明裡沒有的就說不確定。）"
 GATED_NOTE = (
     "（這次沒有附上課程：學生這句話和平台上的課程內容關聯不高。"
     "請先親切回應，問一個問題了解學生想學什麼；如果是鋼琴以外或和學琴無關的需求，就簡短婉拒並拉回找課。"
@@ -62,14 +65,25 @@ NO_COURSE_REPLY = "AI 暫時沒有回應，目前也還沒有已發布的課程�
 def reply(db: Session, messages: list[dict]) -> dict:
     """messages 是整段對話（role 為 user 或 assistant），最後一則是學生剛說的話。"""
     said = [item["content"] for item in messages if item["role"] == "user"]
-    # 學生說得出來的程度、預算、地區等條件，用找課原本的規則確實篩選；後面說的蓋過前面
-    criteria = {}
-    for text in said:
-        criteria.update(parse_criteria(SHORT_CITY.sub(r"\1市", text)))
-    retrieval = retrieve_courses(db, said, criteria, k=CANDIDATE_COUNT)
+    parsed = parse_conversation(messages)
+    note = None
+    if parsed is None:
+        # 沒有啟用微調模型或它沒回應：用原本的規則解析程度、預算、地區等條件，後面說的蓋過前面
+        criteria = {}
+        for text in said:
+            criteria.update(parse_criteria(SHORT_CITY.sub(r"\1市", text)))
+        retrieval = retrieve_courses(db, said, criteria, k=CANDIDATE_COUNT)
+    else:
+        criteria = {field: parsed[field] for field in CRITERIA_FIELDS}
+        if parsed["intent"] == "course_search":
+            retrieval = retrieve_courses(db, said, criteria, k=CANDIDATE_COUNT, query=parsed["search_query"] or None)
+        else:
+            # 問平台怎麼用或和學琴無關：不用找課，不附課程卡片
+            retrieval = Retrieval([], {}, set(), "skipped", True, None)
+            note = PLATFORM_NOTE if parsed["intent"] == "platform_howto" else GATED_NOTE
     candidates = retrieval.rows
     text, reason = llm.generate_text_with_reason(
-        _system_prompt(candidates, gated=retrieval.gated),
+        _system_prompt(candidates, gated=retrieval.gated, note=note),
         _transcript(messages),
         feature=FEATURE_COURSE_CHAT,
         timeout_seconds=TIMEOUT_SECONDS,
@@ -158,7 +172,7 @@ def _warnings(segments: list[str], course: Course, criteria: dict) -> list[str]:
     return warnings
 
 
-def _system_prompt(candidates: list, gated: bool = False) -> str:
+def _system_prompt(candidates: list, gated: bool = False, note: str | None = None) -> str:
     blocks = []
     for index, (course, teacher_name, _photo) in enumerate(candidates, start=1):
         price = f"NT$ {course.price_per_lesson} / 堂" if course.price_per_lesson is not None else "未填"
@@ -172,7 +186,7 @@ def _system_prompt(candidates: list, gated: bool = False) -> str:
         )
     if gated:
         # 不是「沒有課」：只是這句話和課程內容關聯不高，不能讓模型說平台沒有課程
-        courses = GATED_NOTE
+        courses = note or GATED_NOTE
     else:
         courses = "\n".join(blocks) or "（目前沒有已發布的課程）"
     return f"{SYSTEM_PROMPT}\n\n平台說明：\n{PLATFORM_GUIDE}\n\n可以推薦的課程：\n{courses}"

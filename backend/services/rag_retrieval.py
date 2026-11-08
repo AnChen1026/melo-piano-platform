@@ -103,11 +103,12 @@ def should_gate(status: str, criteria: dict, top_score: float | None) -> bool:
     return status == "ready" and not has_criteria and top_score is not None and top_score < MIN_SIMILARITY
 
 
-def retrieve_courses(db, user_turns: list[str], criteria: dict, k: int = TOP_K) -> Retrieval:
+def retrieve_courses(db, user_turns: list[str], criteria: dict, k: int = TOP_K, query: str | None = None) -> Retrieval:
     """符合條件的課排前面，同一組裡依相似度排序；學生沒說任何條件、最相關的課又低於門檻時，不給課程。
 
     向量服務沒開或索引不完整時（status 不是 ready），照最新課程排序，不套門檻，
     和改造前一樣能用，只是比較不準。
+    query：需求解析模型整理好的主題（search_query）；沒有就用最近三句對話。
     """
     from sqlalchemy import select
 
@@ -127,7 +128,7 @@ def retrieve_courses(db, user_turns: list[str], criteria: dict, k: int = TOP_K) 
     )
     rows = db.execute(statement).all()
     matching = set(db.scalars(_apply_required_filters(select(Course.id).where(Course.status == "published"), criteria)))
-    query = build_query(user_turns, QUERY_STRATEGY)
+    query = query or build_query(user_turns, QUERY_STRATEGY)
     scores, status = {}, "unavailable"
     version = embedding_version()
     if query and rows and version:

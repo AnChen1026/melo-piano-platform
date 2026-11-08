@@ -8,7 +8,7 @@ RUN npm run build
 FROM python:3.12-slim
 ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=/app
 WORKDIR /app
-RUN apt-get update && apt-get install -y --no-install-recommends build-essential libsndfile1 ffmpeg && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends build-essential libsndfile1 ffmpeg tesseract-ocr tesseract-ocr-chi-tra tesseract-ocr-eng && rm -rf /var/lib/apt/lists/*
 COPY backend/requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r /app/requirements.txt
 RUN pip install --no-cache-dir basic-pitch==0.4.0 --no-deps

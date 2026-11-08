@@ -3,9 +3,13 @@ FROM python:3.12.10-slim
 
 # 2. 安裝 Linux 底層必要的編譯工具（有些舊版 scipy/numpy 在安裝時會需要 gcc 編譯）
 #    ffmpeg：讀瀏覽器錄的 webm／m4a 音檔，librosa 自己讀不了這些格式
+#    tesseract-ocr：AI 出題時辨識掃描的 PDF（繁中＋英文）
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     ffmpeg \
+    tesseract-ocr \
+    tesseract-ocr-chi-tra \
+    tesseract-ocr-eng \
     && rm -rf /var/lib/apt/lists/*
 
 # 3. 在容器內部開闢一間叫 /app 的虛擬辦公室，並把位置停在這裡

@@ -180,6 +180,46 @@ def test_PDF教材可以讀出文字():
     assert "Treble clef" in text
 
 
+def scanned_pdf(text: str) -> bytes:
+    """做一份沒有文字層的 PDF：先把字畫成圖片，再把圖片貼進新的 PDF。"""
+    import pymupdf
+
+    source = pymupdf.open()
+    source.new_page().insert_text((72, 100), text, fontsize=28)
+    image = source[0].get_pixmap(dpi=150).tobytes("png")
+    scanned = pymupdf.open()
+    page = scanned.new_page()
+    page.insert_image(page.rect, stream=image)
+    return scanned.tobytes()
+
+
+def test_掃描的PDF頁面改用OCR_有文字的頁面不跑OCR(monkeypatch):
+    import pymupdf
+
+    document = pymupdf.open(stream=scanned_pdf("scan"), filetype="pdf")
+    document.new_page().insert_text((72, 72), "Treble clef lines: E G B D F")
+    ocr_calls = []
+    monkeypatch.setattr(ai_quiz, "ocr_page", lambda page: ocr_calls.append(page.number) or "Bass clef lines: G B D F A")
+    text = ai_quiz.extract_text("theory.pdf", document.tobytes())
+    assert ocr_calls == [0]
+    assert text.index("Bass clef") < text.index("Treble clef")  # 照頁碼順序
+
+
+def test_OCR也讀不到字時_告訴老師原因(monkeypatch):
+    monkeypatch.setattr(ai_quiz, "ocr_page", lambda page: "")
+    with pytest.raises(ai_quiz.QuizGenerationError, match="讀不到文字"):
+        ai_quiz.extract_text("scan.pdf", scanned_pdf("scan"))
+
+
+def test_真的用Tesseract辨識掃描的PDF():
+    import shutil
+
+    if shutil.which("tesseract") is None:
+        pytest.skip("這台電腦沒有裝 Tesseract（Docker 裡有）")
+    text = ai_quiz.extract_text("scan.pdf", scanned_pdf("Treble clef lines E G B D F"))
+    assert "Treble" in text
+
+
 def test_學生和其他老師看不到出題紀錄(setup, make_user, login, fake_llm):
     _, _, _, teacher_client, student_client = setup
     assert generate(student_client).status_code in (401, 403)

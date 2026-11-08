@@ -3,17 +3,21 @@
 出題邏輯（system prompt、讀教材、剔除格式錯誤的題目）沿用宇鈞在 ai-quiz 分支寫的版本，
 改成走專案共用的 backend/services/llm.py：預設用 OpenAI（OPENAI_API_KEY），.env 寫 QUIZ_GENERATION_LLM_PROVIDER=gemini
 換回 Gemini，寫 local 改用 Ollie 電腦上的千問等本機模型（QUIZ_GENERATION_LLM_MODEL 選模型），並加上多選題、是非題、難易度與作答提示。
+掃描的 PDF 頁面用 Tesseract OCR 辨識（同樣來自宇鈞的 ai-quiz 分支），這裡改用 PyMuPDF 內建的 OCR 呼叫。
 
 這裡只負責「出題」：背景工作與進度在 services/quiz_jobs.py，老師審查後題目跟作業一起由 services/assignment.py 存起來。
 """
 
 import json
+import logging
 import re
 import time
 from collections.abc import Callable
 from pathlib import Path
 
 from backend.services import llm
+
+logger = logging.getLogger(__name__)
 
 QUESTION_TYPES = ("single", "multiple", "truefalse")
 QUESTION_TYPE_LABELS = {"single": "單選題", "multiple": "多選題", "truefalse": "是非題"}
@@ -26,6 +30,11 @@ MAX_QUESTIONS = 30
 MAX_SOURCE_BYTES = 20 * 1024 * 1024
 MAX_MATERIAL_CHARS = 30000  # 送進模型的教材長度上限
 SOURCE_SUFFIXES = (".pdf", ".txt")
+# 掃描的 PDF 沒有文字層，改用 OCR（Tesseract，Dockerfile 有安裝繁中與英文語言包）
+OCR_LANGUAGES = "chi_tra+eng"
+OCR_DPI = 300
+OCR_MIN_PAGE_CHARS = 20  # 一頁讀到的字比這少，就當成掃描頁
+MAX_OCR_PAGES = 30  # 一頁約 1～3 秒，避免上傳等太久
 # 一次出很多題時模型要想比較久
 GENERATION_TIMEOUT_SECONDS = 120.0
 # 本機模型（千問等）：閘道每則訊息最多 12000 字、一次最多回 1400 token，所以每批讀一段教材、出幾題
@@ -98,11 +107,34 @@ def decode_text_bytes(data: bytes) -> str:
 
 
 def extract_pdf_text(data: bytes) -> str:
+    """有文字層的頁面直接讀；掃描的頁面（幾乎讀不到字）改用 OCR 辨識。"""
     import pymupdf
 
+    pages = []
+    total = 0
+    ocr_pages = 0
     with pymupdf.open(stream=data, filetype="pdf") as pdf:
-        pages = [page.get_text().strip() for page in pdf]
-    return "\n\n".join(text for text in pages if text)
+        for page in pdf:
+            if total >= MAX_MATERIAL_CHARS:
+                break  # 超過的部分本來就不會送進模型，不用再辨識
+            text = page.get_text().strip()
+            if len(text) < OCR_MIN_PAGE_CHARS and ocr_pages < MAX_OCR_PAGES:
+                ocr_pages += 1
+                text = ocr_page(page) or text
+            if text:
+                pages.append(text)
+                total += len(text)
+    return "\n\n".join(pages)
+
+
+def ocr_page(page) -> str:
+    """用 Tesseract 辨識整頁。電腦沒裝 Tesseract 或辨識失敗時回傳空字串，讓呼叫端照原本的訊息處理。"""
+    try:
+        textpage = page.get_textpage_ocr(language=OCR_LANGUAGES, dpi=OCR_DPI, full=True)
+        return page.get_text(textpage=textpage).strip()
+    except Exception as error:  # 沒裝 Tesseract 時 PyMuPDF 丟 RuntimeError
+        logger.warning("PDF 第 %s 頁 OCR 失敗：%s", page.number + 1, error)
+        return ""
 
 
 def extract_text(filename: str, data: bytes) -> str:
@@ -119,7 +151,7 @@ def extract_text(filename: str, data: bytes) -> str:
     except Exception as error:
         raise QuizGenerationError(f"讀不出這個檔案的內容：{error}") from error
     if not text.strip():
-        raise QuizGenerationError("這個檔案讀不到文字。如果是掃描的 PDF，請改上傳有文字的 PDF 或 TXT。")
+        raise QuizGenerationError("這個檔案讀不到文字。掃描的 PDF 會自動辨識文字，可能是圖片太模糊；請改上傳較清楚的 PDF 或 TXT。")
     return text
 
 

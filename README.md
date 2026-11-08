@@ -70,6 +70,8 @@ flowchart LR
 
 ## 快速開始
 
+> 要連 AI 功能、假資料、AI 找課一起啟動：照 **[docs/快速啟動.md](docs/快速啟動.md)** 一步一步做。
+
 需要 [Docker Desktop](https://www.docker.com/products/docker-desktop/)。以下指令都在專案根目錄執行。
 
 1. 建立環境變數檔，並把 `SESSION_SECRET_KEY` 換成自己產生的隨機字串。這個檔案不要提交到 Git。

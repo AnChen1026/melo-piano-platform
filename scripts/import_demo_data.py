@@ -34,7 +34,7 @@ def _snapshot(record, names):
 
 
 def _known_versions():
-    return json.loads((Path(__file__).parent / "data/aicourse-demo-versions.json").read_text())
+    return json.loads((Path(__file__).parent / "data/aicourse-demo-versions.json").read_text(encoding="utf-8"))
 
 
 def import_demo(db, source, *, refresh_existing=False, known_versions=None):
@@ -193,7 +193,7 @@ def main():
         parser.error("Remote imports require APP_ENV=staging")
     if args.apply and args.confirm_database != url.database:
         parser.error("--apply requires --confirm-database matching target database")
-    source = json.loads((Path(__file__).parent / "data/aicourse-demo.json").read_text())
+    source = json.loads((Path(__file__).parent / "data/aicourse-demo.json").read_text(encoding="utf-8"))
     with SessionLocal() as db:
         try:
             # Serialize repeated imports without affecting normal website writes.

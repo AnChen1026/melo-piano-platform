@@ -173,12 +173,13 @@ def api_create_quiz_job(
     course_id: uuid.UUID | None = Form(None),
     student_id: uuid.UUID | None = Form(None),
     due_at: datetime | None = Form(None),
+    use_ocr: bool = Form(False),
     db: Session = Depends(get_db),
     teacher: TeacherDB = Depends(get_current_teacher),
 ):
     """題庫作業上傳：讀老師的教材（PDF／TXT），在背景請 AI 出題，馬上回應。
     types 用逗號分隔：single,multiple,truefalse；difficulty 是 easy／medium／hard／mixed。
-    作業名稱與指派對象可以先帶著，審查完直接發作業。進度用 GET /teacher/quiz/jobs 看。"""
+    作業名稱與指派對象可以先帶著，審查完直接發作業。use_ocr 時辨識 PDF 裡的圖片文字。進度用 GET /teacher/quiz/jobs 看。"""
     data = file.file.read(MAX_SOURCE_BYTES + 1)
     try:
         job = quiz_jobs.create_job(
@@ -193,6 +194,7 @@ def api_create_quiz_job(
             course_id=course_id,
             student_id=student_id,
             due_at=due_at,
+            use_ocr=use_ocr,
         )
     except StudentBusinessError as error:
         _raise(error)

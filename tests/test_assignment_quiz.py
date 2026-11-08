@@ -180,6 +180,72 @@ def test_PDF教材可以讀出文字():
     assert "Treble clef" in text
 
 
+def scanned_pdf(text: str) -> bytes:
+    """做一份沒有文字層的 PDF：先把字畫成圖片，再把圖片貼進新的 PDF。"""
+    import pymupdf
+
+    source = pymupdf.open()
+    source.new_page().insert_text((72, 100), text, fontsize=28)
+    image = source[0].get_pixmap(dpi=150).tobytes("png")
+    scanned = pymupdf.open()
+    page = scanned.new_page()
+    page.insert_image(page.rect, stream=image)
+    return scanned.tobytes()
+
+
+def test_沒勾OCR_不辨識圖片_掃描檔提醒老師勾選(monkeypatch):
+    monkeypatch.setattr(ai_quiz, "extract_image_text", lambda page, bbox: pytest.fail("沒勾 OCR 不應該辨識圖片"))
+    with pytest.raises(ai_quiz.QuizGenerationError, match="勾選"):
+        ai_quiz.extract_text("scan.pdf", scanned_pdf("scan"))
+
+
+def test_勾OCR_圖片文字依位置穿插_去掉跟文字層重複的行(monkeypatch):
+    import pymupdf
+
+    image = pymupdf.open(stream=scanned_pdf("scan"), filetype="pdf")[0].get_pixmap(dpi=72).tobytes("png")
+    document = pymupdf.open()
+    page = document.new_page()
+    page.insert_text((72, 40), "Treble clef lines: E G B D F")  # 在圖片上方的文字層
+    page.insert_image(pymupdf.Rect(0, 200, page.rect.width, page.rect.height), stream=image)
+    # OCR 結果有一行跟文字層一樣（要去掉）、一行是新的
+    monkeypatch.setattr(ai_quiz, "extract_image_text", lambda page, bbox: "Treble clef lines: E G B D F\nBass clef lines: G B D F A")
+    text = ai_quiz.extract_text("theory.pdf", document.tobytes(), use_ocr=True)
+    assert text.count("Treble clef") == 1
+    assert "[圖片 OCR]\nBass clef lines: G B D F A" in text
+    assert text.index("Treble clef") < text.index("Bass clef")
+
+
+def test_沒裝Tesseract時_告訴老師原因(monkeypatch):
+    import pytesseract
+
+    def missing(page, bbox):
+        raise pytesseract.TesseractNotFoundError()
+
+    monkeypatch.setattr(ai_quiz, "extract_image_text", missing)
+    with pytest.raises(ai_quiz.QuizGenerationError, match="Tesseract") as error:
+        ai_quiz.extract_text("scan.pdf", scanned_pdf("scan"), use_ocr=True)
+    assert error.value.status_code == 500
+
+
+def test_出題API收到use_ocr_會辨識圖片(setup, fake_llm, monkeypatch):
+    _, _, _, teacher_client, _ = setup
+    monkeypatch.setattr(ai_quiz, "extract_image_text", lambda page, bbox: "Bass clef lines: G B D F A")
+    files = {"file": ("scan.pdf", scanned_pdf("scan"), "application/pdf")}
+    without = teacher_client.post("/teacher/quiz/jobs", data={"count": "2"}, files=files)
+    assert without.status_code == 400 and "勾選" in without.json()["detail"]
+    response = teacher_client.post("/teacher/quiz/jobs", data={"count": "2", "use_ocr": "true"}, files=files)
+    assert response.status_code == 202, response.text
+
+
+def test_真的用Tesseract辨識掃描的PDF():
+    import shutil
+
+    if shutil.which("tesseract") is None:
+        pytest.skip("這台電腦沒有裝 Tesseract（Docker 裡有）")
+    text = ai_quiz.extract_text("scan.pdf", scanned_pdf("Treble clef lines E G B D F"), use_ocr=True)
+    assert "Treble" in text
+
+
 def test_學生和其他老師看不到出題紀錄(setup, make_user, login, fake_llm):
     _, _, _, teacher_client, student_client = setup
     assert generate(student_client).status_code in (401, 403)

@@ -41,3 +41,6 @@ music21>=9.1
 
 # 題庫作業：從老師上傳的 PDF 讀出文字給 AI 出題
 pymupdf>=1.24
+# 老師勾選 OCR 時辨識 PDF 裡的圖片（需要系統裝 tesseract，Dockerfile 有裝）
+pytesseract>=0.3.10
+Pillow>=10.0

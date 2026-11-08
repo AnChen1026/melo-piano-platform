@@ -179,6 +179,8 @@ export interface QuizJobInput {
   course_id?: string
   student_id?: string
   due_at?: string | null
+  // 辨識 PDF 裡的圖片文字（掃描檔要勾）
+  use_ocr?: boolean
 }
 
 export function createQuizJob(input: QuizJobInput) {
@@ -191,6 +193,7 @@ export function createQuizJob(input: QuizJobInput) {
   if (input.course_id) form.append('course_id', input.course_id)
   if (input.student_id) form.append('student_id', input.student_id)
   if (input.due_at) form.append('due_at', input.due_at)
+  if (input.use_ocr) form.append('use_ocr', 'true')
   return request<QuizJob>('/teacher/quiz/jobs', { method: 'POST', body: form })
 }
 

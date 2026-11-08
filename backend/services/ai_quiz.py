@@ -3,11 +3,14 @@
 出題邏輯（system prompt、讀教材、剔除格式錯誤的題目）沿用宇鈞在 ai-quiz 分支寫的版本，
 改成走專案共用的 backend/services/llm.py：預設用 OpenAI（OPENAI_API_KEY），.env 寫 QUIZ_GENERATION_LLM_PROVIDER=gemini
 換回 Gemini，寫 local 改用 Ollie 電腦上的千問等本機模型（QUIZ_GENERATION_LLM_MODEL 選模型），並加上多選題、是非題、難易度與作答提示。
+老師勾選 OCR 時，PDF 裡的圖片用 Tesseract（pytesseract）辨識，再去掉跟文字層重複的行，邏輯照宇鈞 ai-quiz 分支的版本。
 
 這裡只負責「出題」：背景工作與進度在 services/quiz_jobs.py，老師審查後題目跟作業一起由 services/assignment.py 存起來。
 """
 
+import io
 import json
+import os
 import re
 import time
 from collections.abc import Callable
@@ -26,6 +29,10 @@ MAX_QUESTIONS = 30
 MAX_SOURCE_BYTES = 20 * 1024 * 1024
 MAX_MATERIAL_CHARS = 30000  # 送進模型的教材長度上限
 SOURCE_SUFFIXES = (".pdf", ".txt")
+# OCR：辨識 PDF 裡的圖片（Tesseract，Dockerfile 有安裝繁中與英文語言包）
+OCR_ZOOM = 2.0  # 圖片放大兩倍再辨識，字比較清楚
+OCR_LANG = os.environ.get("OCR_LANG", "chi_tra+eng")
+OCR_CONFIG = "--psm 6"
 # 一次出很多題時模型要想比較久
 GENERATION_TIMEOUT_SECONDS = 120.0
 # 本機模型（千問等）：閘道每則訊息最多 12000 字、一次最多回 1400 token，所以每批讀一段教材、出幾題
@@ -55,6 +62,7 @@ SYSTEM_PROMPT = """你是一位專業的鋼琴與樂理出題老師，負責根�
 8. 若教材內容不足以出到要求的題數，就只出能出的題數，不要硬湊。
 9. 每題寫完都要對照教材自我檢查：answers 標的每個選項都必須正確、沒標的都必須錯誤，explanation 要和 answers 一致。
    多選題尤其要逐一檢查每個選項；不確定的題目寧可不出。
+10. 教材裡的「[第 N 頁]」頁碼標記和「[圖片 OCR]」標記只是參考，不可以當成題目內容；OCR 辨識出來的文字可能有錯字，看不懂的部分不要拿來出題。
 
 # 輸出格式
 只輸出一個 JSON 物件，不要有任何其他文字或 Markdown，格式如下：
@@ -97,16 +105,77 @@ def decode_text_bytes(data: bytes) -> str:
     return data.decode("utf-8", errors="ignore")
 
 
-def extract_pdf_text(data: bytes) -> str:
+def normalize_line(text: str) -> str:
+    return re.sub(r"\s+", "", text).casefold()
+
+
+def extract_image_text(page, bbox) -> str:
+    """裁切 PDF 的圖片區域，用 Tesseract 辨識。"""
+    import pymupdf
+    import pytesseract
+    from PIL import Image
+
+    pix = page.get_pixmap(matrix=pymupdf.Matrix(OCR_ZOOM, OCR_ZOOM), clip=bbox, alpha=False)
+    with Image.open(io.BytesIO(pix.tobytes("png"))) as image:
+        return pytesseract.image_to_string(image, lang=OCR_LANG, config=OCR_CONFIG).strip()
+
+
+def extract_pdf_text(data: bytes, use_ocr: bool = False) -> str:
+    """照頁碼順序讀 PDF 的文字；use_ocr 時另外辨識每一張圖片，依位置和文字穿插，並去掉跟文字層重複的行。"""
     import pymupdf
 
+    pages = []
     with pymupdf.open(stream=data, filetype="pdf") as pdf:
-        pages = [page.get_text().strip() for page in pdf]
-    return "\n\n".join(text for text in pages if text)
+        for page_num, page in enumerate(pdf, start=1):
+            if not use_ocr:
+                text = page.get_text("text", sort=True).strip()
+                if text:
+                    pages.append(f"[第 {page_num} 頁]\n{text}")
+                continue
+
+            # (上緣, 左緣, 0=文字層／1=OCR, 文字)
+            segments = []
+            for block in page.get_text("blocks", sort=True):
+                if len(block) >= 7 and block[6] == 0:
+                    text = block[4].strip()
+                    if text:
+                        segments.append((float(block[1]), float(block[0]), 0, text))
+            for info in page.get_image_info():
+                bbox = pymupdf.Rect(info["bbox"])
+                text = extract_image_text(page, bbox)
+                if text:
+                    segments.append((bbox.y0, bbox.x0, 1, text))
+            segments.sort(key=lambda item: (item[0], item[1], item[2]))
+
+            native_keys = {
+                normalize_line(line)
+                for _, _, kind, text in segments
+                if kind == 0
+                for line in text.splitlines()
+                if normalize_line(line)
+            }
+            seen_ocr = set()
+            page_parts = []
+            for _, _, kind, text in segments:
+                if kind == 0:
+                    page_parts.append(text)
+                    continue
+                unique_lines = []
+                for line in text.splitlines():
+                    line = line.strip()
+                    key = normalize_line(line)
+                    if key and key not in native_keys and key not in seen_ocr:
+                        unique_lines.append(line)
+                        seen_ocr.add(key)
+                if unique_lines:
+                    page_parts.append("[圖片 OCR]\n" + "\n".join(unique_lines))
+            if page_parts:
+                pages.append(f"[第 {page_num} 頁]\n" + "\n\n".join(page_parts))
+    return "\n\n".join(pages)
 
 
-def extract_text(filename: str, data: bytes) -> str:
-    """回傳教材的純文字。檔案不能讀時丟 QuizGenerationError。"""
+def extract_text(filename: str, data: bytes, use_ocr: bool = False) -> str:
+    """回傳教材的純文字。use_ocr 時辨識 PDF 裡的圖片。檔案不能讀時丟 QuizGenerationError。"""
     if not data:
         raise QuizGenerationError("教材檔案是空的。")
     if len(data) > MAX_SOURCE_BYTES:
@@ -114,12 +183,20 @@ def extract_text(filename: str, data: bytes) -> str:
     suffix = Path(filename).suffix.lower()
     if suffix not in SOURCE_SUFFIXES:
         raise QuizGenerationError("題庫檔案目前只支援 PDF 與 TXT。")
+    import pytesseract
+
     try:
-        text = decode_text_bytes(data).strip() if suffix == ".txt" else extract_pdf_text(data)
+        text = decode_text_bytes(data).strip() if suffix == ".txt" else extract_pdf_text(data, use_ocr)
+    except pytesseract.TesseractNotFoundError as error:
+        raise QuizGenerationError("伺服器沒有安裝 Tesseract，暫時不能辨識圖片文字。", status_code=500) from error
+    except pytesseract.TesseractError as error:
+        raise QuizGenerationError(f"圖片文字辨識失敗：{error}", status_code=500) from error
     except Exception as error:
         raise QuizGenerationError(f"讀不出這個檔案的內容：{error}") from error
     if not text.strip():
-        raise QuizGenerationError("這個檔案讀不到文字。如果是掃描的 PDF，請改上傳有文字的 PDF 或 TXT。")
+        if suffix == ".pdf" and not use_ocr:
+            raise QuizGenerationError("這份 PDF 讀不到文字，可能是掃描檔。請勾選「辨識 PDF 圖片裡的文字（OCR）」再送出。")
+        raise QuizGenerationError("這個檔案讀不到可以出題的文字。請改上傳有文字的 PDF 或 TXT。")
     return text
 
 

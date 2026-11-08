@@ -44,11 +44,12 @@ def create_job(
     course_id: uuid.UUID | None = None,
     student_id: uuid.UUID | None = None,
     due_at: datetime | None = None,
+    use_ocr: bool = False,
 ) -> QuizGenerationJob:
     """先檢查檔案與設定（有錯馬上告訴老師），再建一筆排隊中的工作。真正出題在 run_job。"""
     try:
         count, chosen, difficulty = check_settings(count, types, difficulty)
-        text = extract_text(filename, data)
+        text = extract_text(filename, data, use_ocr)
     except QuizGenerationError as error:
         raise StudentBusinessError(error.status_code, str(error)) from error
     if course_id is not None:

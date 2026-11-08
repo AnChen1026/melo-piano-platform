@@ -8,7 +8,7 @@ import re
 import uuid
 from datetime import datetime, timedelta, timezone
 
-from sqlalchemy import delete, select
+from sqlalchemy import delete, or_, select
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session
 
@@ -146,13 +146,18 @@ def _ask(row: RecommendationSession, field: str, question: str | None = None) ->
     _append_message(row, "assistant", question)
 
 
-def _apply_required_filters(statement, criteria):
+def _apply_required_filters(statement, criteria, include_unspecified_delivery=True):
     if criteria.get("level"):
         statement = statement.where(Course.level == criteria["level"])
     if criteria.get("style"):
         statement = statement.where(Course.style.is_not(None), Course.style.ilike(f"%{criteria['style']}%"))
     if criteria.get("delivery_mode"):
-        statement = statement.where(Course.delivery_mode == criteria["delivery_mode"])
+        # 上課方式沒填的課（示範資料的「線上／實體皆可」都是這樣存）不排除，卡片上再提醒向老師確認；
+        # 只比對「等於」的話，學生說了線上或實體，這些課就完全找不到
+        matches = Course.delivery_mode == criteria["delivery_mode"]
+        statement = statement.where(
+            or_(matches, Course.delivery_mode.is_(None)) if include_unspecified_delivery else matches
+        )
     if criteria.get("region"):
         region = str(criteria["region"])
         statement = statement.where(Course.region.is_not(None), Course.region.ilike(f"%{region}%"))

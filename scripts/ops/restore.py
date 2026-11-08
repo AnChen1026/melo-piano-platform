@@ -96,8 +96,10 @@ def restore_check(settings, bundle):
                 "-v",
                 "ON_ERROR_STOP=1",
                 "-c",
-                "CREATE SCHEMA IF NOT EXISTS extensions; "
-                "CREATE EXTENSION IF NOT EXISTS vector WITH SCHEMA extensions;",
+                (
+                    "CREATE SCHEMA IF NOT EXISTS extensions; "
+                    "CREATE EXTENSION IF NOT EXISTS vector WITH SCHEMA extensions;"
+                ),
             ]
         )
         execute(

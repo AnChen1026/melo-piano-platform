@@ -11,6 +11,7 @@ from backend.routers.health import router as health_router
 from backend.routers.images import router as images_router
 from backend.routers.public_courses import router as public_courses_router
 from backend.routers.recommendations import router as recommendations_router
+from backend.routers.course_chat import router as course_chat_router
 from backend.routers.auth import router as auth_router
 from backend.routers.student import router as student_router
 from backend.routers.support import router as support_router
@@ -44,6 +45,7 @@ app.include_router(auth_router)
 app.include_router(public_courses_router)
 app.include_router(images_router)
 app.include_router(recommendations_router)
+app.include_router(course_chat_router)
 app.include_router(admin_router)
 app.include_router(student_router)
 app.include_router(assignments_router)

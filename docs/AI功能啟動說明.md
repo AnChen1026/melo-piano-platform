@@ -29,10 +29,10 @@
 
 | 你有的東西 | 走哪條路 | 能用的功能 | 花錢嗎 |
 |---|---|---|---|
-| OpenAI API 金鑰 | **路線 A** | ① 出題、② 回饋 | 用多少付多少 |
+| OpenAI API 金鑰 | **路線 A** | ① 出題、② 回饋、③ AI 找課（聊天，不比對意思） | 用多少付多少 |
 | 電腦可以裝 Ollama（記憶體 8GB 以上） | **路線 B** | ① 出題、② 回饋、③ AI 找課 | 免費 |
 
-- **AI 找課（③）只有路線 B 能用。**
+- **AI 找課（③）兩條都能聊天**；但「比對意思找最相近的課」要路線 B 的 bge-m3，路線 A 只會依條件篩選、照新到舊挑課。
 - **音訊評分本身**（比對音高、節奏）不需要任何 AI，做完第 1 步就能用；A 或 B 只影響評分後那段「文字回饋」寫得好不好。
 - 兩條都想要也可以：先做 A，之後再做 B。
 
@@ -300,9 +300,9 @@ uv run python -m scripts.index_course_embeddings --apply --confirm-database aipe
 ✅ 跑完沒有紅色錯誤，最後一行是 `indexed=` 和 `published=` 一樣的數字就對了。想再確認一次，可以重跑上面的試跑指令，看到 `pending=0` 代表全部建好。
 
 ### 3-10 ③ AI 找課：試用
-- [ ] 打開 <http://localhost>，按右下角 **AI 找課**，打「我想學流行鋼琴」。
+- [ ] 打開 <http://localhost>，按右下角 **AI 找課**，打「我完全沒學過，想自彈自唱流行歌」。
 
-✅ 有推薦課程出來就對了。
+✅ 10～30 秒內有一段回覆，下面附上提到的課程卡片就對了。可以接著問「台中有便宜一點的嗎？」或「怎麼約課？」。
 
 🎉 路線 B 完成：①②③ 都在你的電腦上跑。
 
@@ -365,7 +365,9 @@ uv run python -m scripts.index_course_embeddings --apply --confirm-database aipe
    ```env
    QUIZ_GENERATION_LLM_MODEL=qwen3:14b
    PRACTICE_FEEDBACK_LLM_MODEL=qwen3:14b
+   COURSE_CHAT_LLM_MODEL=qwen3:14b
    ```
+   `COURSE_CHAT_LLM_MODEL` 管 ③ AI 找課的聊天回覆。實測 24GB 的 Mac mini：4B 一輪約 5～13 秒，14B 約 13～31 秒；14B 比較會照條件挑課、不會把成人課推給小朋友，約課流程也講得比較對。
 
 ---
 
@@ -373,4 +375,4 @@ uv run python -m scripts.index_course_embeddings --apply --confirm-database aipe
 
 - 後端呼叫 AI 都經過 `backend/services/llm.py`：看 `<功能>_LLM_PROVIDER` 決定用 `openai`、`gemini` 或 `local`（本機閘道）。AI 出題沒設定時預設用 OpenAI；課前摘要跟著 `LLM_PROVIDER`。
 - 本機模型一次能讀、能寫的字數有限，所以 AI 出題會分批，每批 4 題。出題在背景跑，完成後老師在作業選單看到通知，審查時可以改答案。
-- AI 找課（Ollie 負責）用的是同一個閘道，細節在 [shared-local-ai.md](shared-local-ai.md)。
+- AI 找課用的是同一個閘道，細節在 [shared-local-ai.md](shared-local-ai.md)。現在是聊天顧問：先檢索最相關的課程，再讓模型只根據這些課程回答，回覆走 `COURSE_CHAT_LLM_PROVIDER`（沒設就跟 `LLM_PROVIDER`）。設計見 [ADR 0011](adr/0011-ai-course-chat.md)。

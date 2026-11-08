@@ -39,6 +39,10 @@ class Course(Base):
             "status IN ('draft', 'published', 'archived')",
             name="ck_courses_status",
         ),
+        CheckConstraint(
+            "delivery_mode IS NULL OR delivery_mode IN ('online', 'in_person')",
+            name="ck_courses_delivery_mode",
+        ),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)

@@ -1,8 +1,15 @@
 """Search only reorders existing authorized candidates with current embeddings."""
 
-from backend.models.course_embedding import CourseEmbedding
+from backend.models.rag_document import EMBEDDING_DIMENSION, SOURCE_COURSE, RagDocument
 from backend.models.student import Course
 from backend.services.ai_semantic import course_hash, rank_public_courses
+
+
+def axis(index):
+    """1024 維的單位向量，只有第 index 維是 1；兩個不同軸的餘弦相似度是 0。"""
+    vector = [0.0] * EMBEDDING_DIMENSION
+    vector[index] = 1.0
+    return vector
 
 
 def test_semantic_search_orders_current_embeddings_without_dropping_unindexed(
@@ -21,10 +28,12 @@ def test_semantic_search_orders_current_embeddings_without_dropping_unindexed(
     third = Course(teacher_id=teacher.id, title="其他", status="published")
     db.add_all([first, second, third])
     db.flush()
-    for course, vector in [(first, [0.0, 1.0]), (second, [1.0, 0.0])]:
+    for course, vector in [(first, axis(1)), (second, axis(0))]:
         db.add(
-            CourseEmbedding(
+            RagDocument(
+                source_type=SOURCE_COURSE,
                 course_id=course.id,
+                content=course.title,
                 model_version="test-v1",
                 content_hash=course_hash(course),
                 embedding=vector,
@@ -33,7 +42,7 @@ def test_semantic_search_orders_current_embeddings_without_dropping_unindexed(
     db.commit()
     monkeypatch.setenv("AI_COURSE_EMBEDDING_VERSION", "test-v1")
     monkeypatch.setattr(
-        "backend.services.ai_semantic.embed_texts", lambda texts: [[1.0, 0.0]]
+        "backend.services.ai_semantic.embed_texts", lambda texts: [axis(0)]
     )
     rows = [(first, "老師", None), (second, "老師", None), (third, "老師", None)]
     result = rank_public_courses(db, rows, "電影配樂")
@@ -99,3 +108,34 @@ def test_語意搜尋不可用時明確顯示一般排序(db, make_user, monkeyp
     result = TestClient(app).post('/api/recommendations', json={'message': '電影配樂'}).json()
     assert result['status'] == 'done'
     assert '語意' in result['message'] and '一般' in result['message']
+
+
+def test_pgvector_similarity_matches_cosine_and_ignores_other_model_versions(db, make_user):
+    from backend.services.ai_semantic import course_similarities
+
+    teacher = make_user("teacher")
+    course = Course(teacher_id=teacher.id, title="爵士", status="published")
+    other = Course(teacher_id=teacher.id, title="古典", status="published")
+    db.add_all([course, other])
+    db.flush()
+    half = [0.0] * EMBEDDING_DIMENSION
+    half[0] = half[1] = 1.0  # 和 axis(0) 夾 45 度，餘弦相似度 = 0.7071
+    db.add_all(
+        [
+            RagDocument(source_type=SOURCE_COURSE, course_id=course.id, content="爵士", model_version="v1", content_hash="h", embedding=half),
+            RagDocument(source_type=SOURCE_COURSE, course_id=other.id, content="古典", model_version="old", content_hash="h", embedding=axis(0)),
+        ]
+    )
+    db.flush()
+    found = course_similarities(db, [course.id, other.id], axis(0), "v1")
+    assert set(found) == {course.id}
+    assert abs(found[course.id][1] - 0.5**0.5) < 1e-6
+
+
+def test_rag_document_rejects_course_rows_without_course(db):
+    import pytest
+    from sqlalchemy.exc import IntegrityError
+
+    db.add(RagDocument(source_type=SOURCE_COURSE, content="x", model_version="v1", content_hash="h", embedding=axis(0)))
+    with pytest.raises(IntegrityError):
+        db.flush()

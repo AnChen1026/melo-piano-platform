@@ -11,6 +11,7 @@ from psycopg import sql
 from scripts.ops.backup import verify_bundle
 from scripts.ops.common import OpsError, atomic_json, utcnow
 from scripts.ops.database_refs import file_columns
+from scripts.ops.postgres import POSTGRES_IMAGE
 
 
 def execute(args, timeout=180):
@@ -54,7 +55,7 @@ def restore_check(settings, bundle):
                 "POSTGRES_DB=restore_test",
                 "-v",
                 str(bundle) + ":/restore:ro",
-                "postgres:17",
+                POSTGRES_IMAGE,
             ]
         )
         created = True
@@ -80,6 +81,25 @@ def restore_check(settings, bundle):
             time.sleep(1)
         else:
             raise OpsError("isolated_database_not_ready")
+        # 備份只含 public schema；向量欄位的型別在 extensions schema（Supabase 的慣例），
+        # 要先建好，pg_restore 才認得 extensions.vector。
+        execute(
+            [
+                docker,
+                "exec",
+                name,
+                "psql",
+                "-U",
+                "postgres",
+                "-d",
+                "restore_test",
+                "-v",
+                "ON_ERROR_STOP=1",
+                "-c",
+                "CREATE SCHEMA IF NOT EXISTS extensions; "
+                "CREATE EXTENSION IF NOT EXISTS vector WITH SCHEMA extensions;",
+            ]
+        )
         execute(
             [
                 docker,

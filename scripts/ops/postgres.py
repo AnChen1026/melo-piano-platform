@@ -11,6 +11,10 @@ from psycopg import sql
 from scripts.ops.common import OpsError
 from scripts.ops.database_refs import file_columns
 
+# 和 docker-compose 的資料庫同一個映像：PostgreSQL 17.11（Debian 13）＋ pgvector。
+# 從 024 起資料表用到 extensions.vector 型別，還原時資料庫必須有這個擴充功能。
+POSTGRES_IMAGE = "pgvector/pgvector:0.8.1-pg17-trixie"
+
 
 class Postgres:
     def __init__(self, settings):
@@ -89,7 +93,7 @@ class Postgres:
             "PGCONNECT_TIMEOUT=15",
             "-v",
             s.pg["sslrootcert"] + ":/certs/root.crt:ro",
-            "postgres:17",
+            POSTGRES_IMAGE,
             "pg_dump",
             "-h",
             s.pg["host"],
@@ -126,7 +130,7 @@ class Postgres:
             "--rm",
             "-v",
             str(Path(target).resolve()) + ":/backup/database.dump:ro",
-            "postgres:17",
+            POSTGRES_IMAGE,
             "pg_restore",
             "--list",
             "/backup/database.dump",

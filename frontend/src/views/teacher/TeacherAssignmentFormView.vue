@@ -56,6 +56,7 @@ const quiz = reactive({
   customCount: '' as number | '',
   types: ['single'] as QuizQuestionType[],
   difficulty: 'easy' as QuizDifficulty,
+  useOcr: false,
 })
 const preview = ref<QuizDraftQuestion[]>([])
 // 老師按過「儲存題目」的題目，儲存作業時送這份
@@ -179,6 +180,7 @@ async function generate() {
       course_id: form.courseId,
       student_id: form.studentId,
       due_at: form.dueDate ? new Date(`${form.dueDate}T23:59:00`).toISOString() : null,
+      use_ocr: quiz.useOcr,
     })
     notice.value = 'AI 開始出題了。完成後「作業」選單會亮起通知，可以先離開這頁，回來在「AI 出題紀錄」按「審查」。'
     quiz.file = null
@@ -494,6 +496,10 @@ onBeforeUnmount(() => window.clearTimeout(pollTimer))
             <input ref="quizFileInput" type="file" accept=".pdf,.txt,application/pdf,text/plain" class="visually-hidden" @change="onQuizFile" />
           </label>
           <p v-if="errors.quizFile" class="error-text">{{ errors.quizFile }}</p>
+          <label class="option">
+            <input v-model="quiz.useOcr" type="checkbox" /> 辨識 PDF 圖片裡的文字（OCR）
+          </label>
+          <p class="muted">掃描的 PDF 或圖片裡有文字時勾選，出題會比較慢。</p>
         </div>
 
         <h2 class="upload__section">出題設定</h2>

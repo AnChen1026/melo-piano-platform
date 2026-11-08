@@ -188,3 +188,20 @@ def test_unrelated_message_gets_no_courses_but_model_is_not_told_there_are_none(
     assert "聊天測試不該出現的課" not in calls[0]["system"]
     assert course_chat.GATED_NOTE in calls[0]["system"]
     assert "目前沒有已發布的課程" not in calls[0]["system"]
+
+
+def test_card_reminds_to_confirm_when_delivery_mode_is_not_filled(db, make_user):
+    teacher = make_user("teacher")
+    unspecified = add_course(db, teacher, "聊天測試未填上課方式", delivery_mode=None, price_per_lesson=900)
+    online = add_course(db, teacher, "聊天測試線上課", delivery_mode="online", price_per_lesson=900)
+
+    assert course_chat._warnings([], unspecified, {"delivery_mode": "online"}) == ["課程沒填上課方式，請向老師確認是否可以線上上課"]
+    assert course_chat._warnings([], online, {"delivery_mode": "online"}) == []
+    # 學生沒說上課方式就不用提醒
+    assert course_chat._warnings([], unspecified, {}) == []
+
+
+def test_card_warns_when_delivery_mode_differs_from_request(db, make_user):
+    in_person = add_course(db, make_user("teacher"), "聊天測試實體課", delivery_mode="in_person", region="台北市大安區")
+
+    assert course_chat._warnings([], in_person, {"delivery_mode": "online"}) == ["這門是實體課，不是你說的線上"]

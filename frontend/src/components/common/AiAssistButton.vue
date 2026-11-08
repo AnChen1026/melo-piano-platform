@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 
 import { sendCourseChat, type ChatCourse } from '@/api/courseChat'
@@ -9,7 +9,17 @@ interface ChatMessage { role: 'assistant' | 'user'; text: string; courses?: Chat
 
 const GREETING = '嗨！想學什麼樣的鋼琴？跟我聊聊你的程度、想彈的曲子、預算或地區，我會從老師已發布的課程裡幫你挑。平台怎麼用也可以問我。'
 
+// 後端一次回完整回覆、不回報進度，所以依經過時間換提示（本機模型一輪約 4～30 秒）。
+// 文字只描述「正在做什麼」，不宣稱找到幾門課這類前端不知道的事
+const FIRST_STAGE = '正在找符合的課程…'
+const LATER_STAGES = [
+  { after: 2500, text: '正在整理回覆…' },
+  { after: 15000, text: '回覆比較長，再等一下…' },
+]
+
 const open = ref(false)
+const stage = ref(FIRST_STAGE)
+let stageTimers: ReturnType<typeof setTimeout>[] = []
 const input = ref('')
 const loading = ref(false)
 const error = ref('')
@@ -17,6 +27,19 @@ const error = ref('')
 const messages = ref<ChatMessage[]>([{ role: 'assistant', text: GREETING }])
 const inputElement = ref<HTMLInputElement | null>(null)
 const bodyElement = ref<HTMLElement | null>(null)
+
+function startStages() {
+  stopStages()
+  stage.value = FIRST_STAGE
+  stageTimers = LATER_STAGES.map((item) => setTimeout(() => { stage.value = item.text }, item.after))
+}
+
+function stopStages() {
+  stageTimers.forEach(clearTimeout)
+  stageTimers = []
+}
+
+onBeforeUnmount(stopStages)
 
 const canSubmit = computed(() => input.value.trim().length > 0 && !loading.value)
 const started = computed(() => messages.value.length > 1)
@@ -44,6 +67,7 @@ async function submit() {
   input.value = ''
   error.value = ''
   loading.value = true
+  startStages()
   scrollToLatest()
   try {
     const history = messages.value.slice(1).map((message) => ({ role: message.role, content: message.text }))
@@ -54,6 +78,7 @@ async function submit() {
     input.value = text
     error.value = caught instanceof Error ? caught.message : '系統忙碌中，請稍後再試。'
   } finally {
+    stopStages()
     loading.value = false
     scrollToLatest(!error.value)
     await nextTick(() => inputElement.value?.focus())
@@ -94,7 +119,9 @@ function restart() {
               </article>
             </div>
           </template>
-          <p v-if="loading" class="message message--assistant">正在想…</p>
+          <p v-if="loading" class="message message--assistant message--pending">
+            <span class="typing" aria-hidden="true"><i /><i /><i /></span>{{ stage }}
+          </p>
         </div>
 
         <p v-if="error" class="error" role="alert">{{ error }}</p>
@@ -136,6 +163,13 @@ function restart() {
 .message { width: fit-content; max-width: 88%; margin: 0; padding: 9px 12px; border-radius: 14px; font-size: 14px; line-height: 1.55; white-space: pre-line; }
 .message--assistant { background: var(--home-cream); border-bottom-left-radius: 4px; }
 .message--user { justify-self: end; background: var(--home-ink); color: var(--home-paper); border-bottom-right-radius: 4px; }
+.message--pending { display: inline-flex; align-items: center; gap: 8px; color: var(--home-muted); }
+.typing { display: inline-flex; gap: 3px; }
+.typing i { width: 5px; height: 5px; border-radius: 50%; background: var(--home-accent); animation: typing 1.2s infinite ease-in-out; }
+.typing i:nth-child(2) { animation-delay: .15s; }
+.typing i:nth-child(3) { animation-delay: .3s; }
+@keyframes typing { 0%, 60%, 100% { opacity: .25; transform: translateY(0); } 30% { opacity: 1; transform: translateY(-3px); } }
+@media (prefers-reduced-motion: reduce) { .typing i { animation: none; opacity: .6; } }
 .results { display: grid; gap: 10px; margin: 2px 0 6px; }
 .course-card { padding: 14px; border: 1px solid var(--home-line); border-radius: 14px; background: #fff; }
 .course-card h3, .course-card p { margin: 0 0 5px; }

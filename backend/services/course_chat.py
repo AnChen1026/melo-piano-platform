@@ -137,6 +137,13 @@ def _warnings(segments: list[str], course: Course, criteria: dict) -> list[str]:
             warnings.append("課程沒填價格，無法確認是否在預算內")
         elif price > int(budget):
             warnings.append(f"每堂 NT$ {price:,}，超過你說的 NT$ {int(budget):,}")
+    mode = criteria.get("delivery_mode")
+    # 篩選時沒填上課方式的課不排除（示範資料的「線上／實體皆可」都存成空值），這裡提醒學生確認
+    if mode and course.delivery_mode is None:
+        warnings.append(f"課程沒填上課方式，請向老師確認是否可以{DELIVERY_TEXT[mode]}上課")
+    elif mode and course.delivery_mode != mode:
+        # 模型可能把實體課說成「線上也可以」，以課程資料為準
+        warnings.append(f"這門是{DELIVERY_TEXT.get(course.delivery_mode, '其他方式')}課，不是你說的{DELIVERY_TEXT[mode]}")
     region = criteria.get("region")
     # 線上課在哪裡都能上，不用比地區
     if region and course.delivery_mode != "online" and str(region) not in (course.region or "").replace("臺", "台"):

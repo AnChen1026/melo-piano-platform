@@ -59,6 +59,8 @@ def restore_check(settings, bundle):
             ]
         )
         created = True
+        # 走 TCP 檢查：映像初始化時會先開一個只聽 unix socket 的臨時伺服器再重啟，
+        # 用 socket 檢查可能在重啟前就回報 ready，下一步的 psql 會失敗。
         for _ in range(30):
             result = subprocess.run(
                 [
@@ -66,6 +68,8 @@ def restore_check(settings, bundle):
                     "exec",
                     name,
                     "pg_isready",
+                    "-h",
+                    "127.0.0.1",
                     "-U",
                     "postgres",
                     "-d",

@@ -9,3 +9,5 @@
 未來 AI 搜尋或 RAG 的正式開發都從當時最新 `main` 開始。若新增資料表，Migration 必須接在合併當下唯一的 Alembic head，並在同一個 Pull Request 提供資料來源、保存期限、權限、失敗處理與可重做的驗證結果。
 
 首頁 AI 找課後來改成根據檢索到的課程聊天回答，推薦說明改由模型撰寫，見 [0011](0011-ai-course-chat.md)。
+
+向量改存 pgvector 的 `rag_documents` 表，對話中檢索的是已發布課程的標題、曲風與介紹；課程事實仍以 `courses` 為準，卡片直接讀 `courses`。需求解析交給微調模型，見 [0012](0012-pgvector-rag-and-fine-tuned-parser.md)。

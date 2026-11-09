@@ -64,7 +64,8 @@ services:
 
 
   postgres:
-    image: postgres:17
+    # PostgreSQL 17.11（Debian 13）＋ pgvector：和原本的 postgres:17 同版本、同系統，既有資料可以直接沿用
+    image: pgvector/pgvector:0.8.1-pg17-trixie
     container_name: aipe04-postgres
     environment:
       POSTGRES_USER: aipe04

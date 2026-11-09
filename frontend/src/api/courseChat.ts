@@ -19,3 +19,12 @@ export interface CourseChatResponse {
 
 export const sendCourseChat = (messages: CourseChatMessage[]) =>
   request<CourseChatResponse>('/api/course-chat', { method: 'POST', body: { messages } })
+
+export interface ChatStarter {
+  text: string
+  // course_search：找某種課；criteria：條件組合；platform_howto：平台怎麼用
+  category: 'course_search' | 'criteria' | 'platform_howto'
+}
+
+// 驗證通過的推薦問題，每次隨機 3 句
+export const getCourseChatStarters = () => request<ChatStarter[]>('/api/course-chat/starters')

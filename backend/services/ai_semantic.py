@@ -95,13 +95,32 @@ def embed_texts(texts):
         return None
 
 
+def course_similarities(db, course_ids, query_vector, version):
+    """在資料庫用 pgvector 算餘弦相似度（1 − <=> 距離），回傳 {課程 id: (內容雜湊, 相似度)}。
+
+    只算傳進來的候選課程：硬條件已先用 SQL 篩過，這裡是精確計算，不經過近似索引，
+    所以不會因為近似搜尋漏掉符合條件的課。
+    """
+    from sqlalchemy import Float, select
+
+    from backend.models.rag_document import SOURCE_COURSE, RagDocument
+
+    if not course_ids:
+        return {}
+    distance = RagDocument.embedding.op("OPERATOR(extensions.<=>)", return_type=Float)(query_vector)
+    statement = select(
+        RagDocument.course_id, RagDocument.content_hash, (1 - distance).label("score")
+    ).where(
+        RagDocument.source_type == SOURCE_COURSE,
+        RagDocument.course_id.in_(course_ids),
+        RagDocument.model_version == version,
+    )
+    return {course_id: (content_hash, float(score)) for course_id, content_hash, score in db.execute(statement)}
+
+
 def rank_public_courses_with_status(db, rows, query):
     """Rank only provided published candidates, ignoring stale or wrong-version vectors."""
     import os
-
-    from sqlalchemy import select
-
-    from backend.models.course_embedding import CourseEmbedding
 
     version = os.environ.get("AI_COURSE_EMBEDDING_VERSION", "")
     if not query or not rows:
@@ -111,29 +130,18 @@ def rank_public_courses_with_status(db, rows, query):
     query_vectors = embed_texts([query[:1000]])
     if not query_vectors:
         return rows, "unavailable"
-    ids = [row[0].id for row in rows]
-    indices = {
-        x.course_id: x
-        for x in db.scalars(
-            select(CourseEmbedding).where(
-                CourseEmbedding.course_id.in_(ids),
-                CourseEmbedding.model_version == version,
-            )
-        )
-    }
-    candidates = []
+    found = course_similarities(db, [row[0].id for row in rows], query_vectors[0], version)
+    scores = {}
     for row in rows:
         course = row[0]
-        vector = indices.get(course.id)
-        data = (
-            {"score": vector.embedding}
-            if vector and vector.content_hash == course_hash(course)
-            else None
-        )
-        candidates.append((row, data))
-    valid_count = sum(data is not None and cosine(data["score"], query_vectors[0]) is not None for _, data in candidates)
-    status = "ready" if valid_count == len(rows) else ("partial" if valid_count else "unavailable")
-    return [row for row, _ in rank_candidates(candidates, query_vectors[0])], status
+        hit = found.get(course.id)
+        # 課程改過但還沒重建索引：舊向量不代表現在的內容，不拿來排序
+        if hit and hit[0] == course_hash(course):
+            scores[course.id] = hit[1]
+    status = "ready" if len(scores) == len(rows) else ("partial" if scores else "unavailable")
+    # 有向量的依相似度由高到低；沒有向量的保留原順序排在後面，不會被刪掉
+    ranked = sorted(rows, key=lambda row: (row[0].id in scores, scores.get(row[0].id, 0.0)), reverse=True)
+    return ranked, status
 
 
 def rank_public_courses(db, rows, query):

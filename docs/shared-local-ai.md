@@ -58,6 +58,8 @@ python -m scripts.cloud_command --config /path/to/.env.cloud.json index-courses
 
 ```sh
 python -m scripts.cloud_command --config /path/to/.env.cloud.json index-courses --apply --confirm-database DATABASE_NAME
+# 建好索引後放入 AI 找課的推薦問題（同樣先試跑，再加 --apply --confirm-database DATABASE_NAME）
+python -m scripts.cloud_command --config /path/to/.env.cloud.json chat-starters
 ```
 
 請在課程異動後重跑，並於更換 BGE 模型 digest 時重建全部索引。工具分批寫入，中斷後可重跑，已完成的部分會保留。此命令是人工操作，尚未建立自動排程。

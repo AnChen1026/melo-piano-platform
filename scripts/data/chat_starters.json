@@ -1,0 +1,254 @@
+{
+ "reviewed": true,
+ "reviewed_by": "Ollie（2026-11-09 在對話中確認）",
+ "note": "Claude 草擬、Ollie 審核。修改題目後要重跑 scripts.chat_starters --apply",
+ "starters": [
+  {
+   "text": "我是成人零基礎，想從頭學鋼琴",
+   "category": "course_search",
+   "expected_themes": [
+    "intro-01",
+    "intro-20"
+   ]
+  },
+  {
+   "text": "完全沒學過，想彈喜歡的流行歌",
+   "category": "course_search",
+   "expected_themes": [
+    "intro-08",
+    "beginner-01"
+   ]
+  },
+  {
+   "text": "想學自彈自唱，自己伴奏自己唱",
+   "category": "course_search",
+   "expected_themes": [
+    "beginner-02"
+   ]
+  },
+  {
+   "text": "小時候學過，想把鋼琴撿回來",
+   "category": "course_search",
+   "expected_themes": [
+    "intro-05"
+   ]
+  },
+  {
+   "text": "幫孩子找第一堂鋼琴課",
+   "category": "course_search",
+   "expected_themes": [
+    "intro-02",
+    "intro-03",
+    "intro-07",
+    "intro-10",
+    "intro-11",
+    "intro-14"
+   ]
+  },
+  {
+   "text": "想學爵士鋼琴的即興",
+   "category": "course_search",
+   "expected_themes": [
+    "beginner-05",
+    "intermediate-06",
+    "intermediate-07",
+    "intermediate-17",
+    "advanced-11",
+    "advanced-12"
+   ]
+  },
+  {
+   "text": "想把電影配樂改編成鋼琴版",
+   "category": "course_search",
+   "expected_themes": [
+    "beginner-04",
+    "intermediate-15",
+    "advanced-16"
+   ]
+  },
+  {
+   "text": "想彈動漫和遊戲的鋼琴曲",
+   "category": "course_search",
+   "expected_themes": [
+    "intro-10",
+    "beginner-04",
+    "intermediate-16",
+    "advanced-16"
+   ]
+  },
+  {
+   "text": "想準備兒童鋼琴檢定",
+   "category": "course_search",
+   "expected_themes": [
+    "beginner-17",
+    "intermediate-18"
+   ]
+  },
+  {
+   "text": "想學教會詩歌的鋼琴伴奏",
+   "category": "course_search",
+   "expected_themes": [
+    "beginner-12",
+    "advanced-14"
+   ]
+  },
+  {
+   "text": "退休了，想輕鬆彈老歌",
+   "category": "course_search",
+   "expected_themes": [
+    "intro-04",
+    "beginner-03"
+   ]
+  },
+  {
+   "text": "想彈蕭邦的浪漫派作品",
+   "category": "course_search",
+   "expected_themes": [
+    "intermediate-03",
+    "advanced-03"
+   ]
+  },
+  {
+   "text": "想學會看五線譜",
+   "category": "course_search",
+   "expected_themes": [
+    "intro-06",
+    "beginner-09",
+    "intermediate-13"
+   ]
+  },
+  {
+   "text": "想學 R&B、Neo Soul 的和聲",
+   "category": "course_search",
+   "expected_themes": [
+    "intermediate-09"
+   ]
+  },
+  {
+   "text": "想自己寫歌、用鋼琴編曲",
+   "category": "course_search",
+   "expected_themes": [
+    "intro-16",
+    "beginner-14",
+    "intermediate-20",
+    "advanced-17"
+   ]
+  },
+  {
+   "text": "會彈吉他，想轉學鋼琴",
+   "category": "course_search",
+   "expected_themes": [
+    "beginner-11"
+   ]
+  },
+  {
+   "text": "想準備婚禮的現場演奏",
+   "category": "course_search",
+   "expected_themes": [
+    "advanced-15",
+    "beginner-20"
+   ]
+  },
+  {
+   "text": "想跟別人一起四手聯彈",
+   "category": "course_search",
+   "expected_themes": [
+    "intro-19",
+    "beginner-10",
+    "advanced-08"
+   ]
+  },
+  {
+   "text": "想找線上的成人入門課",
+   "category": "criteria",
+   "expected_criteria": {
+    "delivery_mode": "online",
+    "level": "入門"
+   }
+  },
+  {
+   "text": "台北市的實體鋼琴課",
+   "category": "criteria",
+   "expected_criteria": {
+    "region": "台北市",
+    "delivery_mode": "in_person"
+   }
+  },
+  {
+   "text": "一堂 1000 元以內的流行鋼琴課",
+   "category": "criteria",
+   "expected_criteria": {
+    "max_price": 1000,
+    "style": "流行"
+   }
+  },
+  {
+   "text": "週末上午可以上的古典鋼琴課",
+   "category": "criteria",
+   "expected_criteria": {
+    "time_slot": "週末上午",
+    "style": "古典"
+   }
+  },
+  {
+   "text": "台中的兒童鋼琴課",
+   "category": "criteria",
+   "expected_criteria": {
+    "region": "台中市",
+    "style": "兒童"
+   }
+  },
+  {
+   "text": "線上的爵士鋼琴課",
+   "category": "criteria",
+   "expected_criteria": {
+    "delivery_mode": "online",
+    "style": "爵士"
+   }
+  },
+  {
+   "text": "平日晚上下班後可以上的課",
+   "category": "criteria",
+   "expected_criteria": {
+    "time_slot": "平日晚上"
+   }
+  },
+  {
+   "text": "怎麼跟老師約課？",
+   "category": "platform_howto",
+   "guide_keywords": [
+    "約課",
+    "時段"
+   ]
+  },
+  {
+   "text": "可以先問老師問題再決定嗎？",
+   "category": "platform_howto",
+   "guide_keywords": [
+    "聯繫老師"
+   ]
+  },
+  {
+   "text": "綁定碼是什麼？要怎麼用？",
+   "category": "platform_howto",
+   "guide_keywords": [
+    "綁定碼"
+   ]
+  },
+  {
+   "text": "練習錄音怎麼拿到回饋？",
+   "category": "platform_howto",
+   "guide_keywords": [
+    "錄音",
+    "回饋"
+   ]
+  },
+  {
+   "text": "不登入也可以找課嗎？",
+   "category": "platform_howto",
+   "guide_keywords": [
+    "登入"
+   ]
+  }
+ ]
+}

@@ -1,0 +1,210 @@
+{"id": "intro-01-q1", "type": "topic", "turns": ["我三十幾歲完全沒碰過鋼琴，想從頭開始學"], "themes": ["intro-01"], "criteria": {}}
+{"id": "intro-01-q2", "type": "topic", "turns": ["大人零基礎可以學琴嗎？想找適合初學的課"], "themes": ["intro-01"], "criteria": {}}
+{"id": "intro-02-q1", "type": "topic", "turns": ["孩子小一，第一次學琴要找什麼課"], "themes": ["intro-02"], "criteria": {}}
+{"id": "intro-02-q2", "type": "topic", "turns": ["想讓六歲的女兒開始接觸鋼琴"], "themes": ["intro-02"], "criteria": {}}
+{"id": "intro-03-q1", "type": "topic", "turns": ["想跟小孩一起學琴，家長也能一起上的那種"], "themes": ["intro-03"], "criteria": {}}
+{"id": "intro-03-q2", "type": "topic", "turns": ["我想陪兒子練琴但自己也不會彈"], "themes": ["intro-03"], "criteria": {}}
+{"id": "intro-04-q1", "type": "topic", "turns": ["我退休了，想慢慢彈一些以前熟悉的老歌"], "themes": ["intro-04"], "criteria": {}}
+{"id": "intro-04-q2", "type": "topic", "turns": ["年紀大了手比較慢，想輕鬆學琴當休閒"], "themes": ["intro-04"], "criteria": {}}
+{"id": "intro-05-q1", "type": "topic", "turns": ["小時候學過幾年後來荒廢了，現在想撿回來"], "themes": ["intro-05"], "criteria": {}}
+{"id": "intro-05-q2", "type": "topic", "turns": ["停琴快二十年，想重新開始彈"], "themes": ["intro-05"], "criteria": {}}
+{"id": "intro-06-q1", "type": "topic", "turns": ["我都是背琴鍵位置在彈，想真的學會看五線譜"], "themes": ["intro-06"], "criteria": {}}
+{"id": "intro-06-q2", "type": "topic", "turns": ["看譜好慢，想從頭學會讀譜"], "themes": ["intro-06"], "criteria": {}}
+{"id": "intro-07-q1", "type": "topic", "turns": ["孩子彈琴節奏忽快忽慢，想加強拍子"], "themes": ["intro-07"], "criteria": {}}
+{"id": "intro-07-q2", "type": "topic", "turns": ["想讓小孩建立穩定的節奏感"], "themes": ["intro-07"], "criteria": {}}
+{"id": "intro-08-q1", "type": "topic", "turns": ["想從喜歡的流行歌開始學，完全沒基礎"], "themes": ["intro-08"], "criteria": {}}
+{"id": "intro-08-q2", "type": "topic", "turns": ["零基礎想彈周杰倫的歌"], "themes": ["intro-08"], "criteria": {}}
+{"id": "intro-09-q1", "type": "topic", "turns": ["我喜歡用耳朵聽歌找音，不太會看譜"], "themes": ["intro-09"], "criteria": {}}
+{"id": "intro-09-q2", "type": "topic", "turns": ["想學聽到旋律就能在琴上找出來"], "themes": ["intro-09"], "criteria": {}}
+{"id": "intro-10-q1", "type": "topic", "turns": ["小孩很愛卡通和遊戲音樂，想用這個引起學琴興趣"], "themes": ["intro-10"], "criteria": {}}
+{"id": "intro-10-q2", "type": "topic", "turns": ["想彈寶可夢、動畫歌曲的兒童入門課"], "themes": ["intro-10"], "criteria": {}}
+{"id": "intro-11-q1", "type": "topic", "turns": ["想讓孩子從兒歌、童謠開始練琴"], "themes": ["intro-11"], "criteria": {}}
+{"id": "intro-11-q2", "type": "topic", "turns": ["用熟悉的童謠來學鋼琴"], "themes": ["intro-11"], "criteria": {}}
+{"id": "intro-12-q1", "type": "topic", "turns": ["我彈琴手很僵硬，想學正確的手型"], "themes": ["intro-12"], "criteria": {}}
+{"id": "intro-12-q2", "type": "topic", "turns": ["手指一直用力過頭，想學自然放鬆的彈法"], "themes": ["intro-12"], "criteria": {}}
+{"id": "intro-13-q1", "type": "topic", "turns": ["想搞懂音名、調號跟和弦是什麼"], "themes": ["intro-13"], "criteria": {}}
+{"id": "intro-13-q2", "type": "topic", "turns": ["鋼琴新手想補樂理基礎"], "themes": ["intro-13"], "criteria": {}}
+{"id": "intro-14-q1", "type": "topic", "turns": ["想讓孩子把唱歌和彈琴連在一起，加強音感"], "themes": ["intro-14"], "criteria": {}}
+{"id": "intro-14-q2", "type": "topic", "turns": ["兒童視唱練耳"], "themes": ["intro-14"], "criteria": {}}
+{"id": "intro-15-q1", "type": "topic", "turns": ["家裡只有電子琴，想學真正的鋼琴彈法"], "themes": ["intro-15"], "criteria": {}}
+{"id": "intro-15-q2", "type": "topic", "turns": ["我原本彈電子琴，想轉鋼琴"], "themes": ["intro-15"], "criteria": {}}
+{"id": "intro-16-q1", "type": "topic", "turns": ["不想只照譜彈，想自己寫短短的旋律"], "themes": ["intro-16"], "criteria": {}}
+{"id": "intro-16-q2", "type": "topic", "turns": ["想用鋼琴隨手創作小曲子"], "themes": ["intro-16"], "criteria": {}}
+{"id": "intro-17-q1", "type": "topic", "turns": ["國中生想學琴，想自己挑喜歡的曲子"], "themes": ["intro-17"], "criteria": {}}
+{"id": "intro-17-q2", "type": "topic", "turns": ["小孩五六年級了，對考試沒興趣只想彈喜歡的歌"], "themes": ["intro-17"], "criteria": {}}
+{"id": "intro-18-q1", "type": "topic", "turns": ["不想考檢定，只想彈一些古典小品"], "themes": ["intro-18"], "criteria": {}}
+{"id": "intro-18-q2", "type": "topic", "turns": ["成人想輕鬆欣賞和彈古典音樂"], "themes": ["intro-18"], "criteria": {}}
+{"id": "intro-19-q1", "type": "topic", "turns": ["想讓孩子跟別人一起四手聯彈"], "themes": ["intro-19"], "criteria": {}}
+{"id": "intro-19-q2", "type": "topic", "turns": ["兩個小孩想一起合奏鋼琴"], "themes": ["intro-19"], "criteria": {}}
+{"id": "intro-20-q1", "type": "topic", "turns": ["我不確定自己適合學哪一種鋼琴，想先諮詢"], "themes": ["intro-20"], "criteria": {}}
+{"id": "intro-20-q2", "type": "topic", "turns": ["想先上一堂評估看看要走什麼路線"], "themes": ["intro-20"], "criteria": {}}
+{"id": "beginner-01-q1", "type": "topic", "turns": ["已經會彈簡單雙手曲，想彈流行抒情歌"], "themes": ["beginner-01"], "criteria": {}}
+{"id": "beginner-01-q2", "type": "topic", "turns": ["想學幫抒情歌配和弦伴奏"], "themes": ["beginner-01"], "criteria": {}}
+{"id": "beginner-02-q1", "type": "topic", "turns": ["想學一邊彈琴一邊唱歌"], "themes": ["beginner-02"], "criteria": {}}
+{"id": "beginner-02-q2", "type": "topic", "turns": ["彈唱入門，想自己伴奏自己唱"], "themes": ["beginner-02"], "criteria": {}}
+{"id": "beginner-03-q1", "type": "topic", "turns": ["想彈台語老歌給爸媽聽"], "themes": ["beginner-03"], "criteria": {}}
+{"id": "beginner-03-q2", "type": "topic", "turns": ["幫台語歌配伴奏"], "themes": ["beginner-03"], "criteria": {}}
+{"id": "beginner-04-q1", "type": "topic", "turns": ["想彈宮崎駿的動畫配樂"], "themes": ["beginner-04"], "criteria": {}}
+{"id": "beginner-04-q2", "type": "topic", "turns": ["喜歡電影原聲帶，想學改編來彈"], "themes": ["beginner-04"], "criteria": {}}
+{"id": "beginner-05-q1", "type": "topic", "turns": ["會一點流行和弦，想開始學藍調"], "themes": ["beginner-05"], "criteria": {}}
+{"id": "beginner-05-q2", "type": "topic", "turns": ["想學 blues 的基本彈法"], "themes": ["beginner-05"], "criteria": {}}
+{"id": "beginner-06-q1", "type": "topic", "turns": ["孩子想彈小步舞曲這類古典舞曲"], "themes": ["beginner-06"], "criteria": {}}
+{"id": "beginner-06-q2", "type": "topic", "turns": ["讓小朋友認識不同的古典舞曲"], "themes": ["beginner-06"], "criteria": {}}
+{"id": "beginner-07-q1", "type": "topic", "turns": ["教本快彈完了，下一步想挑戰小奏鳴曲"], "themes": ["beginner-07"], "criteria": {}}
+{"id": "beginner-07-q2", "type": "topic", "turns": ["準備開始學 sonatina"], "themes": ["beginner-07"], "criteria": {}}
+{"id": "beginner-08-q1", "type": "topic", "turns": ["踩踏板聲音都糊在一起，想學怎麼踩"], "themes": ["beginner-08"], "criteria": {}}
+{"id": "beginner-08-q2", "type": "topic", "turns": ["踏板總是踩不好"], "themes": ["beginner-08"], "criteria": {}}
+{"id": "beginner-09-q1", "type": "topic", "turns": ["看新譜常常卡住停下來，想加強視奏"], "themes": ["beginner-09"], "criteria": {}}
+{"id": "beginner-09-q2", "type": "topic", "turns": ["視譜速度太慢，想練習看了就能彈"], "themes": ["beginner-09"], "criteria": {}}
+{"id": "beginner-10-q1", "type": "topic", "turns": ["孩子會雙手了，想跟另一個人合奏"], "themes": ["beginner-10"], "criteria": {}}
+{"id": "beginner-10-q2", "type": "topic", "turns": ["兒童四手聯彈合作"], "themes": ["beginner-10"], "criteria": {}}
+{"id": "beginner-11-q1", "type": "topic", "turns": ["我會彈吉他，想把和弦能力用到鋼琴上"], "themes": ["beginner-11"], "criteria": {}}
+{"id": "beginner-11-q2", "type": "topic", "turns": ["吉他手想學鍵盤"], "themes": ["beginner-11"], "criteria": {}}
+{"id": "beginner-12-q1", "type": "topic", "turns": ["教會需要人彈琴伴奏，我想學"], "themes": ["beginner-12"], "criteria": {}}
+{"id": "beginner-12-q2", "type": "topic", "turns": ["想在小組聚會幫唱詩歌伴奏"], "themes": ["beginner-12"], "criteria": {}}
+{"id": "beginner-13-q1", "type": "topic", "turns": ["孩子會看譜了，想把樂理用在彈琴上"], "themes": ["beginner-13"], "criteria": {}}
+{"id": "beginner-13-q2", "type": "topic", "turns": ["兒童樂理結合實際彈奏"], "themes": ["beginner-13"], "criteria": {}}
+{"id": "beginner-14-q1", "type": "topic", "turns": ["會彈一些短曲，想試著改編或寫自己的曲子"], "themes": ["beginner-14"], "criteria": {}}
+{"id": "beginner-14-q2", "type": "topic", "turns": ["想學怎麼把歌改編成鋼琴版"], "themes": ["beginner-14"], "criteria": {}}
+{"id": "beginner-15-q1", "type": "topic", "turns": ["一直彈慢歌好膩，想試試拉丁節奏"], "themes": ["beginner-15"], "criteria": {}}
+{"id": "beginner-15-q2", "type": "topic", "turns": ["想學 bossa nova 那種輕快的律動"], "themes": ["beginner-15"], "criteria": {}}
+{"id": "beginner-16-q1", "type": "topic", "turns": ["孩子要第一次上台表演，想好好準備"], "themes": ["beginner-16"], "criteria": {}}
+{"id": "beginner-16-q2", "type": "topic", "turns": ["準備成果發表會"], "themes": ["beginner-16"], "criteria": {}}
+{"id": "beginner-17-q1", "type": "topic", "turns": ["想讓孩子準備初級鋼琴檢定"], "themes": ["beginner-17"], "criteria": {}}
+{"id": "beginner-17-q2", "type": "topic", "turns": ["兒童考級要怎麼開始準備"], "themes": ["beginner-17"], "criteria": {}}
+{"id": "beginner-18-q1", "type": "topic", "turns": ["彈得出音但聽起來很平，想讓旋律更有表情"], "themes": ["beginner-18"], "criteria": {}}
+{"id": "beginner-18-q2", "type": "topic", "turns": ["想學控制大小聲和音色"], "themes": ["beginner-18"], "criteria": {}}
+{"id": "beginner-19-q1", "type": "topic", "turns": ["孩子手太小，八度彈不到怎麼辦"], "themes": ["beginner-19"], "criteria": {}}
+{"id": "beginner-19-q2", "type": "topic", "turns": ["小手適合的簡化編曲"], "themes": ["beginner-19"], "criteria": {}}
+{"id": "beginner-20-q1", "type": "topic", "turns": ["想準備幾首歌在聚會或節日表演"], "themes": ["beginner-20"], "criteria": {}}
+{"id": "beginner-20-q2", "type": "topic", "turns": ["過年想彈幾首應景歌給家人聽"], "themes": ["beginner-20"], "criteria": {}}
+{"id": "intermediate-01-q1", "type": "topic", "turns": ["想學巴哈那種兩個聲部的曲子"], "themes": ["intermediate-01"], "criteria": {}}
+{"id": "intermediate-01-q2", "type": "topic", "turns": ["巴洛克的複音音樂要怎麼彈"], "themes": ["intermediate-01"], "criteria": {}}
+{"id": "intermediate-02-q1", "type": "topic", "turns": ["想把莫札特奏鳴曲彈得更有結構感"], "themes": ["intermediate-02"], "criteria": {}}
+{"id": "intermediate-02-q2", "type": "topic", "turns": ["不只彈完樂章，想理解奏鳴曲式"], "themes": ["intermediate-02"], "criteria": {}}
+{"id": "intermediate-03-q1", "type": "topic", "turns": ["想彈舒曼、蕭邦的抒情小曲，旋律要唱得出來"], "themes": ["intermediate-03"], "criteria": {}}
+{"id": "intermediate-03-q2", "type": "topic", "turns": ["練習彈性速度和歌唱性的旋律"], "themes": ["intermediate-03"], "criteria": {}}
+{"id": "intermediate-04-q1", "type": "topic", "turns": ["想彈德布西，學踏板的層次和音色"], "themes": ["intermediate-04"], "criteria": {}}
+{"id": "intermediate-04-q2", "type": "topic", "turns": ["印象派的和聲色彩好迷人，想學"], "themes": ["intermediate-04"], "criteria": {}}
+{"id": "intermediate-05-q1", "type": "topic", "turns": ["想挑戰普羅高菲夫、蕭士塔高維契這類現代曲"], "themes": ["intermediate-05"], "criteria": {}}
+{"id": "intermediate-05-q2", "type": "topic", "turns": ["青少年想彈二十世紀的作品"], "themes": ["intermediate-05"], "criteria": {}}
+{"id": "intermediate-06-q1", "type": "topic", "turns": ["會七和弦了，想開始彈爵士標準曲"], "themes": ["intermediate-06"], "criteria": {}}
+{"id": "intermediate-06-q2", "type": "topic", "turns": ["想彈 Autumn Leaves 這類 jazz standard"], "themes": ["intermediate-06"], "criteria": {}}
+{"id": "intermediate-07-q1", "type": "topic", "turns": ["爵士和弦怎麼排比較好聽"], "themes": ["intermediate-07"], "criteria": {}}
+{"id": "intermediate-07-q2", "type": "topic", "turns": ["想學爵士的 voicing 跟聲部進行"], "themes": ["intermediate-07"], "criteria": {}}
+{"id": "intermediate-08-q1", "type": "topic", "turns": ["想學拉丁爵士的鋼琴節奏"], "themes": ["intermediate-08"], "criteria": {}}
+{"id": "intermediate-08-q2", "type": "topic", "turns": ["騷莎、蒙圖諾的鋼琴律動"], "themes": ["intermediate-08"], "criteria": {}}
+{"id": "intermediate-09-q1", "type": "topic", "turns": ["想學 R&B、neo soul 的和聲"], "themes": ["intermediate-09"], "criteria": {}}
+{"id": "intermediate-09-q2", "type": "topic", "turns": ["想彈出 groove 很重的靈魂樂"], "themes": ["intermediate-09"], "criteria": {}}
+{"id": "intermediate-10-q1", "type": "topic", "turns": ["要加入樂團當鍵盤手，想準備排練"], "themes": ["intermediate-10"], "criteria": {}}
+{"id": "intermediate-10-q2", "type": "topic", "turns": ["樂團裡的鍵盤要怎麼彈"], "themes": ["intermediate-10"], "criteria": {}}
+{"id": "intermediate-11-q1", "type": "topic", "turns": ["想跟小提琴手一起合奏"], "themes": ["intermediate-11"], "criteria": {}}
+{"id": "intermediate-11-q2", "type": "topic", "turns": ["學鋼琴跟管樂、弦樂合作"], "themes": ["intermediate-11"], "criteria": {}}
+{"id": "intermediate-12-q1", "type": "topic", "turns": ["想幫聲樂家伴奏藝術歌曲"], "themes": ["intermediate-12"], "criteria": {}}
+{"id": "intermediate-12-q2", "type": "topic", "turns": ["學德文藝術歌曲的鋼琴伴奏"], "themes": ["intermediate-12"], "criteria": {}}
+{"id": "intermediate-13-q1", "type": "topic", "turns": ["拿到新譜要很快準備好伴奏，想加強讀譜"], "themes": ["intermediate-13"], "criteria": {}}
+{"id": "intermediate-13-q2", "type": "topic", "turns": ["提升讀譜效率"], "themes": ["intermediate-13"], "criteria": {}}
+{"id": "intermediate-14-q1", "type": "topic", "turns": ["快速音群彈不平均，想加強技巧"], "themes": ["intermediate-14"], "criteria": {}}
+{"id": "intermediate-14-q2", "type": "topic", "turns": ["左右手跑音階不同步"], "themes": ["intermediate-14"], "criteria": {}}
+{"id": "intermediate-15-q1", "type": "topic", "turns": ["想把電影配樂改成鋼琴獨奏"], "themes": ["intermediate-15"], "criteria": {}}
+{"id": "intermediate-15-q2", "type": "topic", "turns": ["我想學電影配樂"], "themes": ["intermediate-15"], "criteria": {}}
+{"id": "intermediate-16-q1", "type": "topic", "turns": ["想彈原神、動漫的鋼琴改編曲"], "themes": ["intermediate-16"], "criteria": {}}
+{"id": "intermediate-16-q2", "type": "topic", "turns": ["高中生想深入彈遊戲音樂"], "themes": ["intermediate-16"], "criteria": {}}
+{"id": "intermediate-17-q1", "type": "topic", "turns": ["不想依賴完整琴譜，想看和弦就能彈歌"], "themes": ["intermediate-17"], "criteria": {}}
+{"id": "intermediate-17-q2", "type": "topic", "turns": ["想練聽寫跟流行歌即興"], "themes": ["intermediate-17"], "criteria": {}}
+{"id": "intermediate-18-q1", "type": "topic", "turns": ["孩子考過初級了，想準備更高級別的考試"], "themes": ["intermediate-18"], "criteria": {}}
+{"id": "intermediate-18-q2", "type": "topic", "turns": ["中級考級曲目要怎麼準備"], "themes": ["intermediate-18"], "criteria": {}}
+{"id": "intermediate-19-q1", "type": "topic", "turns": ["想用錄音聽自己彈得哪裡不好"], "themes": ["intermediate-19"], "criteria": {}}
+{"id": "intermediate-19-q2", "type": "topic", "turns": ["學錄下自己的演奏來改進音色"], "themes": ["intermediate-19"], "criteria": {}}
+{"id": "intermediate-20-q1", "type": "topic", "turns": ["我會寫歌，想用鋼琴做出 demo"], "themes": ["intermediate-20"], "criteria": {}}
+{"id": "intermediate-20-q2", "type": "topic", "turns": ["華語流行歌創作編曲"], "themes": ["intermediate-20"], "criteria": {}}
+{"id": "advanced-01-q1", "type": "topic", "turns": ["想深入彈巴哈的賦格"], "themes": ["advanced-01"], "criteria": {}}
+{"id": "advanced-01-q2", "type": "topic", "turns": ["三聲部以上的複音怎麼練"], "themes": ["advanced-01"], "criteria": {}}
+{"id": "advanced-02-q1", "type": "topic", "turns": ["想完整詮釋貝多芬奏鳴曲"], "themes": ["advanced-02"], "criteria": {}}
+{"id": "advanced-02-q2", "type": "topic", "turns": ["彈貝多芬熱情奏鳴曲"], "themes": ["advanced-02"], "criteria": {}}
+{"id": "advanced-03-q1", "type": "topic", "turns": ["想挑戰蕭邦敘事曲"], "themes": ["advanced-03"], "criteria": {}}
+{"id": "advanced-03-q2", "type": "topic", "turns": ["蕭邦練習曲要怎麼突破"], "themes": ["advanced-03"], "criteria": {}}
+{"id": "advanced-04-q1", "type": "topic", "turns": ["想彈李斯特的炫技作品"], "themes": ["advanced-04"], "criteria": {}}
+{"id": "advanced-04-q2", "type": "topic", "turns": ["寬音域、高難度的炫技曲"], "themes": ["advanced-04"], "criteria": {}}
+{"id": "advanced-05-q1", "type": "topic", "turns": ["想深入拉威爾、德布西的音色控制"], "themes": ["advanced-05"], "criteria": {}}
+{"id": "advanced-05-q2", "type": "topic", "turns": ["法國鋼琴作品的色彩"], "themes": ["advanced-05"], "criteria": {}}
+{"id": "advanced-06-q1", "type": "topic", "turns": ["想彈當代作曲家的鋼琴作品"], "themes": ["advanced-06"], "criteria": {}}
+{"id": "advanced-06-q2", "type": "topic", "turns": ["二十世紀後的現代鋼琴曲進階課"], "themes": ["advanced-06"], "criteria": {}}
+{"id": "advanced-07-q1", "type": "topic", "turns": ["準備鋼琴演奏會跟音樂班文憑考試"], "themes": ["advanced-07"], "criteria": {}}
+{"id": "advanced-07-q2", "type": "topic", "turns": ["要考 ABRSM 演奏文憑"], "themes": ["advanced-07"], "criteria": {}}
+{"id": "advanced-08-q1", "type": "topic", "turns": ["要跟樂團合作協奏曲"], "themes": ["advanced-08"], "criteria": {}}
+{"id": "advanced-08-q2", "type": "topic", "turns": ["雙鋼琴合作排練"], "themes": ["advanced-08"], "criteria": {}}
+{"id": "advanced-09-q1", "type": "topic", "turns": ["想參加鋼琴三重奏"], "themes": ["advanced-09"], "criteria": {}}
+{"id": "advanced-09-q2", "type": "topic", "turns": ["室內樂裡的鋼琴角色"], "themes": ["advanced-09"], "criteria": {}}
+{"id": "advanced-10-q1", "type": "topic", "turns": ["想當專業聲樂伴奏，排練歌劇"], "themes": ["advanced-10"], "criteria": {}}
+{"id": "advanced-10-q2", "type": "topic", "turns": ["歌劇排練鋼琴"], "themes": ["advanced-10"], "criteria": {}}
+{"id": "advanced-11-q1", "type": "topic", "turns": ["已經會即興了，想發展自己的爵士語彙"], "themes": ["advanced-11"], "criteria": {}}
+{"id": "advanced-11-q2", "type": "topic", "turns": ["進階爵士即興"], "themes": ["advanced-11"], "criteria": {}}
+{"id": "advanced-12-q1", "type": "topic", "turns": ["想一個人彈完整的爵士鋼琴獨奏"], "themes": ["advanced-12"], "criteria": {}}
+{"id": "advanced-12-q2", "type": "topic", "turns": ["爵士 solo piano 低音和旋律一起處理"], "themes": ["advanced-12"], "criteria": {}}
+{"id": "advanced-13-q1", "type": "topic", "turns": ["要跟貝斯、鼓組爵士三重奏"], "themes": ["advanced-13"], "criteria": {}}
+{"id": "advanced-13-q2", "type": "topic", "turns": ["爵士樂團裡鋼琴怎麼互動"], "themes": ["advanced-13"], "criteria": {}}
+{"id": "advanced-14-q1", "type": "topic", "turns": ["已經在教會司琴，想學福音音樂的和聲"], "themes": ["advanced-14"], "criteria": {}}
+{"id": "advanced-14-q2", "type": "topic", "turns": ["敬拜團鍵盤進階"], "themes": ["advanced-14"], "criteria": {}}
+{"id": "advanced-15-q1", "type": "topic", "turns": ["想接婚禮演奏的案子"], "themes": ["advanced-15"], "criteria": {}}
+{"id": "advanced-15-q2", "type": "topic", "turns": ["職業歌手伴奏、婚宴現場彈奏"], "themes": ["advanced-15"], "criteria": {}}
+{"id": "advanced-16-q1", "type": "topic", "turns": ["想做高完整度的遊戲配樂鋼琴獨奏"], "themes": ["advanced-16"], "criteria": {}}
+{"id": "advanced-16-q2", "type": "topic", "turns": ["進階影視配樂改編"], "themes": ["advanced-16"], "criteria": {}}
+{"id": "advanced-17-q1", "type": "topic", "turns": ["想用鍵盤即興作曲、做完整配樂"], "themes": ["advanced-17"], "criteria": {}}
+{"id": "advanced-17-q2", "type": "topic", "turns": ["學作曲和配樂創作"], "themes": ["advanced-17"], "criteria": {}}
+{"id": "advanced-18-q1", "type": "topic", "turns": ["排練時要快速看多聲部譜、縮譜"], "themes": ["advanced-18"], "criteria": {}}
+{"id": "advanced-18-q2", "type": "topic", "turns": ["進階視奏跟總譜彈奏"], "themes": ["advanced-18"], "criteria": {}}
+{"id": "advanced-19-q1", "type": "topic", "turns": ["我想當鋼琴老師，學怎麼教學生"], "themes": ["advanced-19"], "criteria": {}}
+{"id": "advanced-19-q2", "type": "topic", "turns": ["鋼琴教學法"], "themes": ["advanced-19"], "criteria": {}}
+{"id": "advanced-20-q1", "type": "topic", "turns": ["想建立個人演奏風格，準備作品集"], "themes": ["advanced-20"], "criteria": {}}
+{"id": "advanced-20-q2", "type": "topic", "turns": ["準備音樂系申請的作品集"], "themes": ["advanced-20"], "criteria": {}}
+{"id": "out-01", "type": "out_of_scope", "turns": ["我想學吉他"], "themes": [], "criteria": {}}
+{"id": "out-02", "type": "out_of_scope", "turns": ["有沒有小提琴課"], "themes": [], "criteria": {}}
+{"id": "out-03", "type": "out_of_scope", "turns": ["想學打爵士鼓"], "themes": [], "criteria": {}}
+{"id": "out-04", "type": "out_of_scope", "turns": ["可以幫我寫數學作業嗎？"], "themes": [], "criteria": {}}
+{"id": "out-05", "type": "out_of_scope", "turns": ["今天天氣怎麼樣"], "themes": [], "criteria": {}}
+{"id": "out-06", "type": "out_of_scope", "turns": ["推薦台北好吃的拉麵"], "themes": [], "criteria": {}}
+{"id": "out-07", "type": "out_of_scope", "turns": ["我想學寫 Python 程式"], "themes": [], "criteria": {}}
+{"id": "out-08", "type": "out_of_scope", "turns": ["想學大提琴"], "themes": [], "criteria": {}}
+{"id": "out-09", "type": "out_of_scope", "turns": ["有教長笛嗎"], "themes": [], "criteria": {}}
+{"id": "out-10", "type": "out_of_scope", "turns": ["我想學唱歌發聲"], "themes": [], "criteria": {}}
+{"id": "out-11", "type": "out_of_scope", "turns": ["想買一台二手鋼琴，推薦哪個牌子"], "themes": [], "criteria": {}}
+{"id": "out-12", "type": "out_of_scope", "turns": ["鋼琴多久要調音一次"], "themes": [], "criteria": {}}
+{"id": "out-13", "type": "out_of_scope", "turns": ["想學管風琴"], "themes": [], "criteria": {}}
+{"id": "out-14", "type": "out_of_scope", "turns": ["有烏克麗麗課嗎"], "themes": [], "criteria": {}}
+{"id": "out-15", "type": "out_of_scope", "turns": ["幫我翻譯這段英文"], "themes": [], "criteria": {}}
+{"id": "out-16", "type": "out_of_scope", "turns": ["想學街舞"], "themes": [], "criteria": {}}
+{"id": "out-17", "type": "out_of_scope", "turns": ["我要報名英文家教"], "themes": [], "criteria": {}}
+{"id": "out-18", "type": "out_of_scope", "turns": ["推薦投資的股票"], "themes": [], "criteria": {}}
+{"id": "out-19", "type": "out_of_scope", "turns": ["想學薩克斯風"], "themes": [], "criteria": {}}
+{"id": "out-20", "type": "out_of_scope", "turns": ["可以教我畫畫嗎"], "themes": [], "criteria": {}}
+{"id": "multi-01", "type": "multi_turn", "turns": ["我想學爵士", "那有沒有進階一點的？"], "themes": ["advanced-11", "advanced-12", "advanced-13"], "criteria": {}, "subtype": "follow_up"}
+{"id": "multi-02", "type": "multi_turn", "turns": ["想讓孩子開始學琴", "他很喜歡卡通歌"], "themes": ["intro-10"], "criteria": {}, "subtype": "follow_up"}
+{"id": "multi-03", "type": "multi_turn", "turns": ["我想學古典鋼琴", "有沒有巴哈的"], "themes": ["intermediate-01", "advanced-01"], "criteria": {}, "subtype": "follow_up"}
+{"id": "multi-04", "type": "multi_turn", "turns": ["想學流行歌", "我想要邊彈邊唱"], "themes": ["beginner-02"], "criteria": {}, "subtype": "follow_up"}
+{"id": "multi-05", "type": "multi_turn", "turns": ["想學電影配樂", "我已經彈很多年了，要高難度的"], "themes": ["advanced-16", "advanced-17"], "criteria": {}, "subtype": "follow_up"}
+{"id": "multi-06", "type": "multi_turn", "turns": ["我想學蕭邦", "入門一點的有嗎"], "themes": ["intermediate-03"], "criteria": {}, "subtype": "follow_up"}
+{"id": "multi-07", "type": "multi_turn", "turns": ["想學伴奏", "是幫教會唱詩歌"], "themes": ["beginner-12", "advanced-14"], "criteria": {}, "subtype": "follow_up"}
+{"id": "multi-08", "type": "multi_turn", "turns": ["想準備考試", "是孩子要考初級檢定"], "themes": ["beginner-17"], "criteria": {}, "subtype": "follow_up"}
+{"id": "multi-09", "type": "multi_turn", "turns": ["想學鋼琴", "我是退休族想彈老歌"], "themes": ["intro-04"], "criteria": {}, "subtype": "follow_up"}
+{"id": "multi-10", "type": "multi_turn", "turns": ["我會彈吉他", "想轉學鍵盤"], "themes": ["beginner-11"], "criteria": {}, "subtype": "follow_up"}
+{"id": "multi-11", "type": "multi_turn", "turns": ["想學即興", "流行歌的那種，不要爵士"], "themes": ["intermediate-17"], "criteria": {}, "subtype": "follow_up"}
+{"id": "multi-12", "type": "multi_turn", "turns": ["想跟別人合奏", "是跟弦樂一起"], "themes": ["intermediate-11"], "criteria": {}, "subtype": "follow_up"}
+{"id": "multi-13", "type": "multi_turn", "turns": ["小孩要表演", "第一次上台很緊張"], "themes": ["beginner-16"], "criteria": {}, "subtype": "follow_up"}
+{"id": "multi-14", "type": "multi_turn", "turns": ["想彈德布西", "要更深入的音色控制"], "themes": ["advanced-05"], "criteria": {}, "subtype": "follow_up"}
+{"id": "multi-15", "type": "multi_turn", "turns": ["想學創作", "我想把寫的華語歌做成 demo"], "themes": ["intermediate-20"], "criteria": {}, "subtype": "follow_up"}
+{"id": "combo-01", "type": "criteria", "turns": ["線上的流行鋼琴入門課，零基礎"], "themes": ["intro-08"], "criteria": {"delivery_mode": "online"}}
+{"id": "combo-02", "type": "criteria", "turns": ["想上實體課學爵士標準曲"], "themes": ["intermediate-06"], "criteria": {"delivery_mode": "in_person"}}
+{"id": "combo-03", "type": "criteria", "turns": ["線上學自彈自唱"], "themes": ["beginner-02"], "criteria": {"delivery_mode": "online"}}
+{"id": "combo-04", "type": "criteria", "turns": ["實體課，孩子想學卡通歌"], "themes": ["intro-10"], "criteria": {"delivery_mode": "in_person"}}
+{"id": "combo-05", "type": "criteria", "turns": ["一堂1500元以內的電影配樂課"], "themes": ["intermediate-15", "beginner-04"], "criteria": {"max_price": 1500}}
+{"id": "combo-06", "type": "criteria", "turns": ["線上上課，想學貝多芬奏鳴曲"], "themes": ["advanced-02"], "criteria": {"delivery_mode": "online"}}
+{"id": "combo-07", "type": "criteria", "turns": ["實體上課，成人零基礎"], "themes": ["intro-01"], "criteria": {"delivery_mode": "in_person"}}
+{"id": "combo-08", "type": "criteria", "turns": ["線上的台語老歌伴奏"], "themes": ["beginner-03"], "criteria": {"delivery_mode": "online"}}
+{"id": "combo-09", "type": "criteria", "turns": ["預算1200以內，想學爵士藍調"], "themes": ["beginner-05"], "criteria": {"max_price": 1200}}
+{"id": "combo-10", "type": "criteria", "turns": ["線上課，想學 R&B 和聲"], "themes": ["intermediate-09"], "criteria": {"delivery_mode": "online"}}
+{"id": "switch-01", "type": "multi_turn", "subtype": "topic_switch", "turns": ["我想學爵士", "算了，我改想學古典奏鳴曲的詮釋"], "themes": ["intermediate-02"], "criteria": {}}
+{"id": "switch-02", "type": "multi_turn", "subtype": "topic_switch", "turns": ["孩子想學卡通歌", "其實是我自己想學，我是成人零基礎"], "themes": ["intro-01"], "criteria": {}}
+{"id": "switch-03", "type": "multi_turn", "subtype": "topic_switch", "turns": ["想學婚禮伴奏", "不對，我是想幫教會唱詩歌伴奏"], "themes": ["beginner-12", "advanced-14"], "criteria": {}}
+{"id": "switch-04", "type": "multi_turn", "subtype": "topic_switch", "turns": ["想學蕭邦", "換個方向，我想學 R&B 的和聲"], "themes": ["intermediate-09"], "criteria": {}}
+{"id": "switch-05", "type": "multi_turn", "subtype": "topic_switch", "turns": ["想學電影配樂", "先不要，我想先把五線譜讀好"], "themes": ["intro-06"], "criteria": {}}

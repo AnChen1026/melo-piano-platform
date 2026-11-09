@@ -7,23 +7,26 @@
 import logging
 import re
 
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from backend.course_parser_spec import CRITERIA_FIELDS
 from backend.models.student import Course
-from backend.models.teacher import TeacherDB
-from backend.models.user import User
 from backend.services import llm
-from backend.services.ai_semantic import rank_public_courses_with_status
-from backend.services.recommendation import _apply_required_filters, parse_criteria
+from backend.services.ai_course_parser import parse_conversation
+from backend.services.rag_retrieval import Retrieval, retrieve_courses
+from backend.services.recommendation import parse_criteria
 
 logger = logging.getLogger(__name__)
 
 FEATURE_COURSE_CHAT = "course_chat"
 # 交給模型參考的課程數。太多會超過本機模型讀得下的長度
 CANDIDATE_COUNT = 6
-# 檢索時只看最近幾句學生說的話，「便宜一點的呢？」這種追問才找得到上下文
-QUERY_TURNS = 3
+PLATFORM_NOTE = "（這次沒有附上課程：學生在問平台怎麼使用，請根據「平台說明」回答；說明裡沒有的就說不確定。）"
+GATED_NOTE = (
+    "（這次沒有附上課程：學生這句話和平台上的課程內容關聯不高。"
+    "請先親切回應，問一個問題了解學生想學什麼；如果是鋼琴以外或和學琴無關的需求，就簡短婉拒並拉回找課。"
+    "不要說平台沒有課程。）"
+)
 # 本機模型寫一段回覆要 10～30 秒
 TIMEOUT_SECONDS = 90
 DELIVERY_TEXT = {"online": "線上", "in_person": "實體"}
@@ -62,13 +65,25 @@ NO_COURSE_REPLY = "AI 暫時沒有回應，目前也還沒有已發布的課程�
 def reply(db: Session, messages: list[dict]) -> dict:
     """messages 是整段對話（role 為 user 或 assistant），最後一則是學生剛說的話。"""
     said = [item["content"] for item in messages if item["role"] == "user"]
-    # 學生說得出來的程度、預算、地區等條件，用找課原本的規則確實篩選；後面說的蓋過前面
-    criteria = {}
-    for text in said:
-        criteria.update(parse_criteria(SHORT_CITY.sub(r"\1市", text)))
-    candidates = _candidates(db, criteria, "\n".join(said[-QUERY_TURNS:]))
+    parsed = parse_conversation(messages)
+    note = None
+    if parsed is None:
+        # 沒有啟用微調模型或它沒回應：用原本的規則解析程度、預算、地區等條件，後面說的蓋過前面
+        criteria = {}
+        for text in said:
+            criteria.update(parse_criteria(SHORT_CITY.sub(r"\1市", text)))
+        retrieval = retrieve_courses(db, said, criteria, k=CANDIDATE_COUNT)
+    else:
+        criteria = {field: parsed[field] for field in CRITERIA_FIELDS}
+        if parsed["intent"] == "course_search":
+            retrieval = retrieve_courses(db, said, criteria, k=CANDIDATE_COUNT, query=parsed["search_query"] or None)
+        else:
+            # 問平台怎麼用或和學琴無關：不用找課，不附課程卡片
+            retrieval = Retrieval([], {}, set(), "skipped", True, None)
+            note = PLATFORM_NOTE if parsed["intent"] == "platform_howto" else GATED_NOTE
+    candidates = retrieval.rows
     text, reason = llm.generate_text_with_reason(
-        _system_prompt(candidates),
+        _system_prompt(candidates, gated=retrieval.gated, note=note),
         _transcript(messages),
         feature=FEATURE_COURSE_CHAT,
         timeout_seconds=TIMEOUT_SECONDS,
@@ -92,23 +107,6 @@ def reply(db: Session, messages: list[dict]) -> dict:
             if row[0].id in segments
         ],
     }
-
-
-def _candidates(db: Session, criteria: dict, query: str) -> list:
-    """先給符合條件的課，不夠再補其他相近的課，模型才能說明哪裡不符合、建議放寬什麼。"""
-    statement = (
-        select(Course, User.name, TeacherDB.photo_path)
-        .join(User, User.id == Course.teacher_id)
-        .outerjoin(TeacherDB, TeacherDB.user_id == Course.teacher_id)
-        .where(Course.status == "published")
-        .order_by(Course.created_at.desc(), Course.id)
-        .limit(1000)
-    )
-    matching = set(db.scalars(_apply_required_filters(select(Course.id).where(Course.status == "published"), criteria)))
-    # 沒有語意索引時維持最新課程的順序，模型一樣只能從這幾門挑
-    ranked, _status = rank_public_courses_with_status(db, db.execute(statement).all(), query)
-    ranked.sort(key=lambda row: row[0].id not in matching)
-    return ranked[:CANDIDATE_COUNT]
 
 
 def _segments(text: str, candidates: list) -> dict:
@@ -153,6 +151,13 @@ def _warnings(segments: list[str], course: Course, criteria: dict) -> list[str]:
             warnings.append("課程沒填價格，無法確認是否在預算內")
         elif price > int(budget):
             warnings.append(f"每堂 NT$ {price:,}，超過你說的 NT$ {int(budget):,}")
+    mode = criteria.get("delivery_mode")
+    # 篩選時沒填上課方式的課不排除（示範資料的「線上／實體皆可」都存成空值），這裡提醒學生確認
+    if mode and course.delivery_mode is None:
+        warnings.append(f"課程沒填上課方式，請向老師確認是否可以{DELIVERY_TEXT[mode]}上課")
+    elif mode and course.delivery_mode != mode:
+        # 模型可能把實體課說成「線上也可以」，以課程資料為準
+        warnings.append(f"這門是{DELIVERY_TEXT.get(course.delivery_mode, '其他方式')}課，不是你說的{DELIVERY_TEXT[mode]}")
     region = criteria.get("region")
     # 線上課在哪裡都能上，不用比地區
     if region and course.delivery_mode != "online" and str(region) not in (course.region or "").replace("臺", "台"):
@@ -167,7 +172,7 @@ def _warnings(segments: list[str], course: Course, criteria: dict) -> list[str]:
     return warnings
 
 
-def _system_prompt(candidates: list) -> str:
+def _system_prompt(candidates: list, gated: bool = False, note: str | None = None) -> str:
     blocks = []
     for index, (course, teacher_name, _photo) in enumerate(candidates, start=1):
         price = f"NT$ {course.price_per_lesson} / 堂" if course.price_per_lesson is not None else "未填"
@@ -179,7 +184,11 @@ def _system_prompt(candidates: list) -> str:
             f"   價格：{price}；時段：{course.time_slots or '未填'}\n"
             f"   介紹：{(course.description or '未填')[:300]}"
         )
-    courses = "\n".join(blocks) or "（目前沒有已發布的課程）"
+    if gated:
+        # 不是「沒有課」：只是這句話和課程內容關聯不高，不能讓模型說平台沒有課程
+        courses = note or GATED_NOTE
+    else:
+        courses = "\n".join(blocks) or "（目前沒有已發布的課程）"
     return f"{SYSTEM_PROMPT}\n\n平台說明：\n{PLATFORM_GUIDE}\n\n可以推薦的課程：\n{courses}"
 
 

@@ -1,15 +1,25 @@
 <script setup lang="ts">
-import { computed, nextTick, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 
-import { sendCourseChat, type ChatCourse } from '@/api/courseChat'
+import { getCourseChatStarters, sendCourseChat, type ChatCourse, type ChatStarter } from '@/api/courseChat'
 import { deliveryText, priceText } from '@/utils/format'
 
 interface ChatMessage { role: 'assistant' | 'user'; text: string; courses?: ChatCourse[] }
 
 const GREETING = '嗨！想學什麼樣的鋼琴？跟我聊聊你的程度、想彈的曲子、預算或地區，我會從老師已發布的課程裡幫你挑。平台怎麼用也可以問我。'
 
+// 後端一次回完整回覆、不回報進度，所以依經過時間換提示（本機模型一輪約 4～30 秒）。
+// 文字只描述「正在做什麼」，不宣稱找到幾門課這類前端不知道的事
+const FIRST_STAGE = '正在找符合的課程…'
+const LATER_STAGES = [
+  { after: 2500, text: '正在整理回覆…' },
+  { after: 15000, text: '回覆比較長，再等一下…' },
+]
+
 const open = ref(false)
+const stage = ref(FIRST_STAGE)
+let stageTimers: ReturnType<typeof setTimeout>[] = []
 const input = ref('')
 const loading = ref(false)
 const error = ref('')
@@ -18,11 +28,45 @@ const messages = ref<ChatMessage[]>([{ role: 'assistant', text: GREETING }])
 const inputElement = ref<HTMLInputElement | null>(null)
 const bodyElement = ref<HTMLElement | null>(null)
 
+function startStages() {
+  stopStages()
+  stage.value = FIRST_STAGE
+  stageTimers = LATER_STAGES.map((item) => setTimeout(() => { stage.value = item.text }, item.after))
+}
+
+function stopStages() {
+  stageTimers.forEach(clearTimeout)
+  stageTimers = []
+}
+
+onBeforeUnmount(stopStages)
+
+// 推薦問題：沒頭緒時點一下就送出。拿不到（例如還沒驗證任何問題）就不顯示
+const starters = ref<ChatStarter[]>([])
+const startersLoading = ref(false)
+
+async function loadStarters() {
+  startersLoading.value = true
+  try {
+    starters.value = await getCourseChatStarters()
+  } catch {
+    starters.value = []
+  } finally {
+    startersLoading.value = false
+  }
+}
+
+function askStarter(text: string) {
+  input.value = text
+  submit()
+}
+
 const canSubmit = computed(() => input.value.trim().length > 0 && !loading.value)
 const started = computed(() => messages.value.length > 1)
 
 async function toggle() {
   open.value = !open.value
+  if (open.value && !started.value && !starters.value.length) loadStarters()
   if (open.value) await nextTick(() => inputElement.value?.focus())
 }
 
@@ -44,6 +88,7 @@ async function submit() {
   input.value = ''
   error.value = ''
   loading.value = true
+  startStages()
   scrollToLatest()
   try {
     const history = messages.value.slice(1).map((message) => ({ role: message.role, content: message.text }))
@@ -54,6 +99,7 @@ async function submit() {
     input.value = text
     error.value = caught instanceof Error ? caught.message : '系統忙碌中，請稍後再試。'
   } finally {
+    stopStages()
     loading.value = false
     scrollToLatest(!error.value)
     await nextTick(() => inputElement.value?.focus())
@@ -64,6 +110,7 @@ function restart() {
   error.value = ''
   input.value = ''
   messages.value = [{ role: 'assistant', text: GREETING }]
+  loadStarters()
   nextTick(() => inputElement.value?.focus())
 }
 </script>
@@ -94,7 +141,23 @@ function restart() {
               </article>
             </div>
           </template>
-          <p v-if="loading" class="message message--assistant">正在想…</p>
+          <div v-if="!started && starters.length" class="starters">
+            <p class="starters__label">不知道從哪裡問起？試試：</p>
+            <button
+              v-for="starter in starters"
+              :key="starter.text"
+              type="button"
+              class="starter"
+              :disabled="loading"
+              @click="askStarter(starter.text)"
+            >
+              {{ starter.text }}
+            </button>
+            <button type="button" class="starters__more" :disabled="startersLoading" @click="loadStarters">換一組</button>
+          </div>
+          <p v-if="loading" class="message message--assistant message--pending">
+            <span class="typing" aria-hidden="true"><i /><i /><i /></span>{{ stage }}
+          </p>
         </div>
 
         <p v-if="error" class="error" role="alert">{{ error }}</p>
@@ -136,6 +199,19 @@ function restart() {
 .message { width: fit-content; max-width: 88%; margin: 0; padding: 9px 12px; border-radius: 14px; font-size: 14px; line-height: 1.55; white-space: pre-line; }
 .message--assistant { background: var(--home-cream); border-bottom-left-radius: 4px; }
 .message--user { justify-self: end; background: var(--home-ink); color: var(--home-paper); border-bottom-right-radius: 4px; }
+.message--pending { display: inline-flex; align-items: center; gap: 8px; color: var(--home-muted); }
+.typing { display: inline-flex; gap: 3px; }
+.typing i { width: 5px; height: 5px; border-radius: 50%; background: var(--home-accent); animation: typing 1.2s infinite ease-in-out; }
+.typing i:nth-child(2) { animation-delay: .15s; }
+.typing i:nth-child(3) { animation-delay: .3s; }
+@keyframes typing { 0%, 60%, 100% { opacity: .25; transform: translateY(0); } 30% { opacity: 1; transform: translateY(-3px); } }
+@media (prefers-reduced-motion: reduce) { .typing i { animation: none; opacity: .6; } }
+.starters { display: grid; gap: 7px; justify-items: start; margin: 4px 0 2px; }
+.starters__label { margin: 0; color: var(--home-muted); font-size: 12px; }
+.starter { max-width: 100%; padding: 8px 12px; border: 1px solid var(--home-line); border-radius: var(--radius-pill); background: #fff; color: var(--home-ink); font: inherit; font-size: 13px; text-align: left; cursor: pointer; }
+.starter:hover:not(:disabled) { border-color: var(--home-accent); color: var(--home-accent); }
+.starters__more { padding: 2px 0; border: 0; background: transparent; color: var(--home-accent); font-size: 12px; font-weight: 600; cursor: pointer; }
+.starter:disabled, .starters__more:disabled { cursor: default; opacity: .5; }
 .results { display: grid; gap: 10px; margin: 2px 0 6px; }
 .course-card { padding: 14px; border: 1px solid var(--home-line); border-radius: 14px; background: #fff; }
 .course-card h3, .course-card p { margin: 0 0 5px; }

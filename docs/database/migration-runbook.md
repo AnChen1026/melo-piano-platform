@@ -19,7 +19,7 @@ alembic -c backend/alembic.ini history --verbose
 目前 `main` 的預期 head：
 
 ```text
-020_course_embeddings (head)
+025_course_chat_starters (head)
 ```
 
 之後一律以 `alembic heads` 的實際唯一 head 為準。兩條功能分支各自新增 Migration 造成多個 head 時，用 merge revision 合併（前例是 `017_merge_storage_audio`、`018_merge_availability_storage`）。
@@ -38,12 +38,12 @@ alembic -c backend/alembic.ini upgrade head
 
 ## 可重現的隔離驗收
 
-先安裝 `backend/requirements.txt`。下面使用獨立、無持久化 volume 的 PostgreSQL 17 容器，不使用開發資料庫：
+先安裝 `backend/requirements.txt`。下面使用獨立、無持久化 volume 的 PostgreSQL 17 容器（含 pgvector，`024` 需要），不使用開發資料庫：
 
 ```bash
 docker run -d --name aipe04-db-test \
   -e POSTGRES_USER=test_user -e POSTGRES_PASSWORD=test_password \
-  -e POSTGRES_DB=aipe04_test -p 127.0.0.1:55432:5432 postgres:17
+  -e POSTGRES_DB=aipe04_test -p 127.0.0.1:55432:5432 pgvector/pgvector:0.8.1-pg17-trixie
 docker exec aipe04-db-test pg_isready -U test_user -d aipe04_test
 ```
 

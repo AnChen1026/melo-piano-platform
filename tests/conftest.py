@@ -62,6 +62,17 @@ def upload_root(tmp_path, monkeypatch):
 
 
 @pytest.fixture(autouse=True)
+def no_ai_gateway(monkeypatch):
+    """測試不連本機 AI 閘道。
+
+    scripts/verify_merge.py 會把整份 .env 帶進測試；有設閘道的人（例如本機千問）
+    跑找課測試時會真的去連線而失敗。需要閘道設定的測試，在測試裡自己 setenv。
+    """
+    for name in ("AI_COURSE_GATEWAY_URL", "AI_COURSE_GATEWAY_TOKEN", "AI_COURSE_EMBEDDING_VERSION"):
+        monkeypatch.delenv(name, raising=False)
+
+
+@pytest.fixture(autouse=True)
 def no_llm(monkeypatch):
     """測試不呼叫真的 Gemini。需要時在測試裡再換成假的回覆。"""
     import backend.services.llm as llm

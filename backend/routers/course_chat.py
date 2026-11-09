@@ -79,3 +79,34 @@ def chat(payload: ChatRequest, request: Request, db: Session = Depends(get_db)):
     if not limiter.allow(_owner(request)):
         raise HTTPException(status_code=429, detail="訊息送得太頻繁，請稍後再試。", headers={"Retry-After": "60"})
     return reply(db, [message.model_dump() for message in payload.messages])
+
+
+STARTER_COUNT = 3
+
+
+class ChatStarter(BaseModel):
+    text: str
+    category: str
+    """course_search：找某種課；criteria：條件組合；platform_howto：平台怎麼用。"""
+
+
+@router.get("/starters", response_model=list[ChatStarter])
+def starters(db: Session = Depends(get_db)):
+    """對話是空的時候給的推薦問題：從驗證通過（is_active）的問題裡隨機挑 3 句。
+
+    三種類型（找課、條件組合、平台使用）各挑一句，讓使用者一眼看到助理能做哪些事；
+    某一類沒有可用的問題時，從其他類補滿。
+    """
+    import random
+
+    from sqlalchemy import select
+
+    from backend.models.course_chat_starter import CATEGORIES, CourseChatStarter
+
+    active = db.scalars(select(CourseChatStarter).where(CourseChatStarter.is_active.is_(True))).all()
+    pools = {category: [row for row in active if row.category == category] for category in CATEGORIES}
+    picked = [random.choice(pool) for pool in pools.values() if pool]
+    rest = [row for row in active if row not in picked]
+    picked += random.sample(rest, min(len(rest), STARTER_COUNT - len(picked)))
+    random.shuffle(picked)
+    return [ChatStarter(text=row.text, category=row.category) for row in picked[:STARTER_COUNT]]

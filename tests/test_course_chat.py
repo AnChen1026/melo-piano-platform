@@ -298,3 +298,19 @@ def test_parser_failure_falls_back_to_rules(db, make_user, fake_model, monkeypat
 
     assert seen["query"] is None
     assert seen["criteria"] == {"region": "台中市", "max_price": 1000}
+
+
+def test_named_teacher_is_searched_even_if_parser_says_off_topic(db, make_user, fake_model, monkeypatch):
+    seen = {}
+
+    def retrieve(db, said, criteria, k, query=None):
+        seen["said"] = said
+        return Retrieval([], {}, set(), "ready", False, None)
+
+    teacher = make_user("teacher", "劉點名老師")
+    add_course(db, teacher, "認識升降記號")
+    monkeypatch.setattr(course_chat, "parse_conversation", lambda messages: parsed(intent="off_topic"))
+    monkeypatch.setattr(course_chat, "retrieve_courses", retrieve)
+
+    assert ask("劉點名老師").status_code == 200
+    assert seen["said"] == ["劉點名老師"]

@@ -13,7 +13,7 @@ from backend.course_parser_spec import CRITERIA_FIELDS
 from backend.models.student import Course
 from backend.services import llm
 from backend.services.ai_course_parser import parse_conversation
-from backend.services.rag_retrieval import Retrieval, retrieve_courses
+from backend.services.rag_retrieval import Retrieval, mentions_teacher, retrieve_courses
 from backend.services.recommendation import parse_criteria
 
 logger = logging.getLogger(__name__)
@@ -75,7 +75,8 @@ def reply(db: Session, messages: list[dict]) -> dict:
         retrieval = retrieve_courses(db, said, criteria, k=CANDIDATE_COUNT)
     else:
         criteria = {field: parsed[field] for field in CRITERIA_FIELDS}
-        if parsed["intent"] == "course_search":
+        # 點名老師一定是要找那位老師的課，就算模型判成無關（它的輸出沒有老師這個欄位）
+        if parsed["intent"] == "course_search" or mentions_teacher(db, said):
             retrieval = retrieve_courses(db, said, criteria, k=CANDIDATE_COUNT, query=parsed["search_query"] or None)
         else:
             # 問平台怎麼用或和學琴無關：不用找課，不附課程卡片

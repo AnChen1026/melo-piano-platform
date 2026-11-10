@@ -11,8 +11,9 @@ export interface TeacherCardData {
   name: string
   specialty: string | null
   bio: string | null
-  // 老師沒有上傳照片時是 null，卡片改顯示名字的第一個字
-  photo: string | null
+  photo: string
+  // 老師還沒上傳照片，用的是示範照片，不是本人
+  isSamplePhoto: boolean
 }
 
 export interface CourseCardData {

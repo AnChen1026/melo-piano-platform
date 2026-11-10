@@ -13,9 +13,12 @@ const emit = defineEmits<{
 <template>
   <article class="teacher-card">
     <div class="teacher-card__photo">
-      <img v-if="teacher.photo" :src="teacher.photo" :alt="`${teacher.name}的照片`" loading="lazy" />
-      <!-- 老師還沒上傳照片：顯示名字的第一個字，不拿別人的照片代替 -->
-      <span v-else class="teacher-card__initial" aria-hidden="true">{{ teacher.name.slice(0, 1) }}</span>
+      <!-- 還沒上傳照片的老師用示範照片，替代文字寫明不是本人 -->
+      <img
+        :src="teacher.photo"
+        :alt="teacher.isSamplePhoto ? '示意照片' : `${teacher.name}的照片`"
+        loading="lazy"
+      />
     </div>
     <div class="teacher-card__body">
       <h3>{{ teacher.name }}</h3>
@@ -59,18 +62,6 @@ const emit = defineEmits<{
   object-fit: cover;
   object-position: center 22%;
   transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.teacher-card__initial {
-  display: grid;
-  place-items: center;
-  width: 100%;
-  height: 100%;
-  background: var(--home-cream);
-  color: var(--home-accent);
-  font-family: var(--font-serif);
-  font-size: 64px;
-  font-weight: 600;
 }
 
 .teacher-card:hover img {

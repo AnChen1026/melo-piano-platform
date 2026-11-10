@@ -73,14 +73,17 @@ onMounted(async () => {
   original.value = JSON.stringify(form)
 })
 
-// 圖片以外都必填（UIUX 回饋）；上課地區只有實體課才需要
+// 實體課、線上實體皆可的課都可能到現場上課，要填地區
+const needsRegion = computed(() => form.delivery_mode === 'in_person' || form.delivery_mode === 'hybrid')
+
+// 圖片以外都必填（UIUX 回饋）；上課地區只有實體課、線上實體皆可的課才需要
 function validate() {
   for (const key of Object.keys(errors)) delete errors[key]
   if (!form.title.trim()) errors.title = '請填課程名稱。'
   if (!form.style) errors.style = '請選擇課程風格。'
   if (!form.level) errors.level = '請選擇找課程度。'
   if (!form.delivery_mode) errors.delivery_mode = '請選擇上課方式。'
-  if (form.delivery_mode === 'in_person' && !form.region.trim()) errors.region = '實體課請填上課地區。'
+  if (needsRegion.value && !form.region.trim()) errors.region = '可以實體上課的課程請填上課地區。'
   if (form.price_per_lesson === '') errors.price_per_lesson = '請填單堂價格。'
   else if (!Number.isInteger(Number(form.price_per_lesson)) || Number(form.price_per_lesson) < 0) {
     errors.price_per_lesson = '單堂價格要是 0 以上的整數。'
@@ -118,7 +121,7 @@ async function save() {
     level: form.level || null,
     style: form.style.trim() || null,
     delivery_mode: form.delivery_mode || null,
-    region: form.delivery_mode === 'in_person' ? form.region.trim() || null : null,
+    region: needsRegion.value ? form.region.trim() || null : null,
     price_per_lesson: form.price_per_lesson === '' ? null : Number(form.price_per_lesson),
     // 依選項的順序存，同樣的勾選每次存出來都一樣
     time_slots: TIME_SLOT_OPTIONS.filter((option) => form.time_slots.includes(option)).join('、') || null,
@@ -192,10 +195,11 @@ async function save() {
           <option value="" disabled>請選擇</option>
           <option value="online">線上</option>
           <option value="in_person">實體</option>
+          <option value="hybrid">線上實體皆可</option>
         </select>
         <p v-if="errors.delivery_mode" class="error-text">{{ errors.delivery_mode }}</p>
       </div>
-      <div v-if="form.delivery_mode === 'in_person'" class="field">
+      <div v-if="needsRegion" class="field">
         <label class="field__label" for="course-region">上課地區<span class="required">*</span></label>
         <input
           id="course-region"

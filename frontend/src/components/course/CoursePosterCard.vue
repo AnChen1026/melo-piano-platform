@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount, ref } from 'vue'
 import CourseImage from './CourseImage.vue'
 import type { CourseSummary } from '@/types/course'
+import { DELIVERY_LABELS } from '@/utils/format'
 
 const props = defineProps<{
   course: CourseSummary
@@ -29,7 +30,8 @@ const priceText = computed(() => {
 })
 
 const metaText = computed(() => {
-  return [props.course.level, props.course.deliveryMode, props.course.region]
+  const mode = props.course.deliveryMode
+  return [props.course.level, mode ? (DELIVERY_LABELS[mode] ?? mode) : null, props.course.region]
     .filter((item) => item)
     .join(' · ')
 })

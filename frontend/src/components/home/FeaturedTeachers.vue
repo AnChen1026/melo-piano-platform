@@ -5,6 +5,8 @@ import type { TeacherCardData } from '@/mocks/home'
 
 defineProps<{
   teachers: TeacherCardData[]
+  // 讀取中或讀取失敗時的說明；空字串代表讀好了
+  status?: string
 }>()
 
 const emit = defineEmits<{
@@ -25,7 +27,8 @@ const emit = defineEmits<{
       每位老師都經過平台審核。先看看誰的風格適合你，再從課程洽詢。
     </SectionHeading>
 
-    <p v-if="teachers.length === 0" class="teachers__empty">找不到符合的老師。</p>
+    <p v-if="status" class="teachers__empty">{{ status }}</p>
+    <p v-else-if="teachers.length === 0" class="teachers__empty">找不到符合的老師。</p>
     <div v-else class="teachers__grid">
       <TeacherCard
         v-for="(teacher, index) in teachers"

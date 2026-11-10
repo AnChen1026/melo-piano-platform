@@ -36,7 +36,7 @@
   → 020 course embeddings
 ```
 
-`015` 之後有兩次分支，由 `017_merge_storage_audio` 與 `018_merge_availability_storage` 合併。目前只有一個 head：`025_course_chat_starters`。所有資料表的用途見 `docs/資料表設計.md`，這裡只寫需要細節的表。
+`015` 之後有兩次分支，由 `017_merge_storage_audio` 與 `018_merge_availability_storage` 合併。目前只有一個 head：`026_course_delivery_hybrid`。所有資料表的用途見 `docs/資料表設計.md`，這裡只寫需要細節的表。
 
 ## `recommendation_sessions`
 

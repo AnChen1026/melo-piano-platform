@@ -207,6 +207,18 @@ def test_card_warns_when_delivery_mode_differs_from_request(db, make_user):
     assert course_chat._warnings([], in_person, {"delivery_mode": "online"}) == ["這門是實體課，不是你說的線上"]
 
 
+def test_hybrid_course_needs_no_delivery_warning(db, make_user):
+    hybrid = add_course(db, make_user("teacher"), "聊天測試皆可課", delivery_mode="hybrid", region="台北市大安區")
+
+    assert course_chat._warnings([], hybrid, {"delivery_mode": "online"}) == []
+    assert course_chat._warnings([], hybrid, {"delivery_mode": "in_person"}) == []
+    # 可以線上上，地區不同也不用提醒；學生指定實體時才比地區
+    assert course_chat._warnings([], hybrid, {"region": "台中市"}) == []
+    assert course_chat._warnings([], hybrid, {"delivery_mode": "in_person", "region": "台中市"}) == [
+        "上課地點在台北市大安區，不是你說的台中市"
+    ]
+
+
 def test_starters_return_three_random_active_questions(db):
     from backend.models.course_chat_starter import CourseChatStarter
 
@@ -298,3 +310,19 @@ def test_parser_failure_falls_back_to_rules(db, make_user, fake_model, monkeypat
 
     assert seen["query"] is None
     assert seen["criteria"] == {"region": "台中市", "max_price": 1000}
+
+
+def test_named_teacher_is_searched_even_if_parser_says_off_topic(db, make_user, fake_model, monkeypatch):
+    seen = {}
+
+    def retrieve(db, said, criteria, k, query=None):
+        seen["said"] = said
+        return Retrieval([], {}, set(), "ready", False, None)
+
+    teacher = make_user("teacher", "劉點名老師")
+    add_course(db, teacher, "認識升降記號")
+    monkeypatch.setattr(course_chat, "parse_conversation", lambda messages: parsed(intent="off_topic"))
+    monkeypatch.setattr(course_chat, "retrieve_courses", retrieve)
+
+    assert ask("劉點名老師").status_code == 200
+    assert seen["said"] == ["劉點名老師"]

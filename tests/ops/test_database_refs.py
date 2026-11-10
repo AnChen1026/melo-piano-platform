@@ -38,6 +38,7 @@ def test_unknown_schema_is_rejected_instead_of_omitting_new_references():
         "023_course_delivery_mode",
         "024_pgvector_rag",
         "025_course_chat_starters",
+        "026_course_delivery_hybrid",
     ],
 )
 def test_later_revisions_keep_same_file_reference_contract(revision):

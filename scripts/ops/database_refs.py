@@ -33,6 +33,7 @@ def file_columns(revision):
         "023_course_delivery_mode",
         "024_pgvector_rag",
         "025_course_chat_starters",
+        "026_course_delivery_hybrid",
     }:
         return [*FILE_COLUMNS, ("practice_feedbacks", "score_sheet_path")]
     raise OpsError("unsupported_application_schema_revision")

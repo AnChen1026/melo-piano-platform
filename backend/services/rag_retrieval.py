@@ -93,6 +93,35 @@ class Retrieval:
         self.top_score = top_score
 
 
+def teacher_key(name: str | None) -> str:
+    """比對用的老師名字：去掉空白和結尾的「老師」。資料庫裡有些名字本身就寫成「劉欣儀老師」。"""
+    key = "".join((name or "").split())
+    return key[: -len("老師")] if key.endswith("老師") else key
+
+
+def mentioned_teachers(teacher_names, user_turns: list[str]) -> set[str]:
+    """學生最近幾句話直接提到的老師。
+
+    課程索引只有課名、曲風和介紹，沒有老師名字，所以「劉欣儀老師」用向量比對找不到她的課，
+    還會被門檻當成無關。老師名字是精確的資訊，直接比對文字。少於兩個字的名字不比，避免誤判。
+    """
+    text = "".join("".join(turn.split()) for turn in user_turns[-RECENT_TURNS:])
+    return {name for name in teacher_names if len(teacher_key(name)) >= 2 and teacher_key(name) in text}
+
+
+def mentions_teacher(db, user_turns: list[str]) -> bool:
+    """學生有沒有提到任何一位有已發布課程的老師。"""
+    from sqlalchemy import select
+
+    from backend.models.student import Course
+    from backend.models.user import User
+
+    names = db.scalars(
+        select(User.name).join(Course, Course.teacher_id == User.id).where(Course.status == "published").distinct()
+    )
+    return bool(mentioned_teachers(names, user_turns))
+
+
 def should_gate(status: str, criteria: dict, top_score: float | None) -> bool:
     """要不要因為「和課程無關」而不給課程。
 
@@ -104,7 +133,8 @@ def should_gate(status: str, criteria: dict, top_score: float | None) -> bool:
 
 
 def retrieve_courses(db, user_turns: list[str], criteria: dict, k: int = TOP_K, query: str | None = None) -> Retrieval:
-    """符合條件的課排前面，同一組裡依相似度排序；學生沒說任何條件、最相關的課又低於門檻時，不給課程。
+    """學生點名的老師的課最前面，再來是符合條件的課，同一組裡依相似度排序；
+    學生沒說任何條件、沒提到老師、最相關的課又低於門檻時，不給課程。
 
     向量服務沒開或索引不完整時（status 不是 ready），照最新課程排序，不套門檻，
     和改造前一樣能用，只是比較不準。
@@ -138,10 +168,12 @@ def retrieve_courses(db, user_turns: list[str], criteria: dict, k: int = TOP_K, 
             covered = sum(1 for row in rows if row[0].id in scores)
             status = "ready" if covered == len(rows) else ("partial" if covered else "unavailable")
     top_score = max(scores.values()) if scores else None
-    gated = should_gate(status, criteria, top_score)
+    named = mentioned_teachers({row[1] for row in rows}, user_turns)
+    gated = not named and should_gate(status, criteria, top_score)
     if gated:
         return Retrieval([], scores, matching, status, True, top_score)
-    # 穩定排序：先依原本的新到舊，再依相似度，最後把符合條件的排前面
+    # 穩定排序：先依原本的新到舊，再依相似度，再把符合條件的排前面，最後把點名的老師排最前面
     ranked = sorted(rows, key=lambda row: scores.get(row[0].id, float("-inf")), reverse=True) if scores else list(rows)
     ranked.sort(key=lambda row: row[0].id not in matching)
+    ranked.sort(key=lambda row: row[1] not in named)
     return Retrieval(ranked[:k], scores, matching, status, False, top_score)

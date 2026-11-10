@@ -10,6 +10,7 @@ from backend.routers.assignments import router as assignments_router
 from backend.routers.health import router as health_router
 from backend.routers.images import router as images_router
 from backend.routers.public_courses import router as public_courses_router
+from backend.routers.public_teachers import router as public_teachers_router
 from backend.routers.recommendations import router as recommendations_router
 from backend.routers.course_chat import router as course_chat_router
 from backend.routers.auth import router as auth_router
@@ -43,6 +44,7 @@ app.add_middleware(
 app.include_router(health_router)
 app.include_router(auth_router)
 app.include_router(public_courses_router)
+app.include_router(public_teachers_router)
 app.include_router(images_router)
 app.include_router(recommendations_router)
 app.include_router(course_chat_router)

@@ -1,20 +1,18 @@
 import classicalCover from '@/assets/images/古典鋼琴.png'
-import teacherLin from '@/assets/images/女老師1.png'
-import teacherChen from '@/assets/images/男老師1.png'
-import teacherChou from '@/assets/images/女老師2.png'
-import teacherKao from '@/assets/images/男老師2.png'
 import studioFemale from '@/assets/images/女老師3.png'
 import studioMale from '@/assets/images/男老師3.png'
 
 // 找課程度只有這幾種，和 GLOSSARY 的「找課程度」一致
 export type CourseLevel = '入門' | '初階' | '中階' | '進階'
 
+// 首頁「認識老師」：資料來自 GET /api/teachers/featured，不是寫死的文案
 export interface TeacherCardData {
   id: string
   name: string
-  specialty: string
-  bio: string
-  photo: string
+  specialty: string | null
+  bio: string | null
+  // 老師沒有上傳照片時是 null，卡片改顯示名字的第一個字
+  photo: string | null
 }
 
 export interface CourseCardData {
@@ -50,38 +48,7 @@ export interface FaqItem {
   answer: string
 }
 
-// 關於我們、老師介紹、上課流程與常見問題是首頁文案。課程清單改由資料庫的已發布課程提供。
-export const teachers: TeacherCardData[] = [
-  {
-    id: 'teacher-lin',
-    name: '林安柔',
-    specialty: '古典鋼琴',
-    bio: '從基本手型與樂譜開始，讓初學者也能穩穩彈完一首曲子。',
-    photo: teacherLin,
-  },
-  {
-    id: 'teacher-chen',
-    name: '陳子謙',
-    specialty: '爵士鋼琴',
-    bio: '用耳朵聽和弦，再慢慢把即興變成自己的句子。',
-    photo: teacherChen,
-  },
-  {
-    id: 'teacher-chou',
-    name: '周以恩',
-    specialty: '流行鋼琴',
-    bio: '把喜歡的歌拆成伴奏，練到可以邊唱邊彈。',
-    photo: teacherChou,
-  },
-  {
-    id: 'teacher-kao',
-    name: '高承恩',
-    specialty: '古典鋼琴',
-    bio: '適合已經有基礎、想把音色和樂句練得更乾淨的人。',
-    photo: teacherKao,
-  },
-]
-
+// 關於我們、上課流程與常見問題是首頁文案。課程清單和老師介紹由資料庫提供。
 export const courseLevels: CourseLevel[] = ['入門', '初階', '中階', '進階']
 
 export const aboutPhotos = [

@@ -10,6 +10,7 @@ import JoinCta from '@/components/home/JoinCta.vue'
 import Footer from '@/components/home/Footer.vue'
 import CourseDetailDialog from '@/components/home/CourseDetailDialog.vue'
 import { fetchPublishedCourses } from '@/api/courses'
+import { fetchFeaturedTeachers } from '@/api/teachers'
 import { toCourseCard } from '@/utils/courseCard'
 import {
   aboutPhotos,
@@ -17,8 +18,8 @@ import {
   highlights,
   studentSteps,
   teacherSteps,
-  teachers,
   type CourseCardData,
+  type TeacherCardData,
 } from '@/mocks/home'
 
 const keyword = ref('')
@@ -26,6 +27,8 @@ const notice = ref('')
 const courses = ref<CourseCardData[]>([])
 const courseStatus = ref('正在讀取已發布的課程…')
 const selectedCourse = ref<CourseCardData | null>(null)
+const teachers = ref<TeacherCardData[]>([])
+const teacherStatus = ref('正在讀取老師…')
 
 onMounted(async () => {
   try {
@@ -36,13 +39,22 @@ onMounted(async () => {
   }
 })
 
+onMounted(async () => {
+  try {
+    teachers.value = await fetchFeaturedTeachers()
+    teacherStatus.value = ''
+  } catch {
+    teacherStatus.value = '讀不到老師，請確認後端有啟動。'
+  }
+})
+
 const query = computed(() => keyword.value.trim().toLowerCase())
 
 const visibleTeachers = computed(() => {
   const text = query.value
-  if (!text) return teachers
-  return teachers.filter((teacher) =>
-    [teacher.name, teacher.specialty, teacher.bio].some((field) => field.toLowerCase().includes(text)),
+  if (!text) return teachers.value
+  return teachers.value.filter((teacher) =>
+    [teacher.name, teacher.specialty, teacher.bio].some((field) => field?.toLowerCase().includes(text)),
   )
 })
 
@@ -81,7 +93,7 @@ function showCourse(course: CourseCardData) {
     </p>
     <PopularCourses :courses="visibleCourses" :status="courseStatus" @view-course="showCourse" />
     <LearningFlow :student-steps="studentSteps" :teacher-steps="teacherSteps" />
-    <FeaturedTeachers :teachers="visibleTeachers" @view-courses="showTeacherCourses" />
+    <FeaturedTeachers :teachers="visibleTeachers" :status="teacherStatus" @view-courses="showTeacherCourses" />
     <FaqSection :faqs="faqs" />
     <JoinCta />
     <Footer />

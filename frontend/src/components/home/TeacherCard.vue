@@ -13,11 +13,13 @@ const emit = defineEmits<{
 <template>
   <article class="teacher-card">
     <div class="teacher-card__photo">
-      <img :src="teacher.photo" :alt="`${teacher.name}的照片`" loading="lazy" />
+      <img v-if="teacher.photo" :src="teacher.photo" :alt="`${teacher.name}的照片`" loading="lazy" />
+      <!-- 老師還沒上傳照片：顯示名字的第一個字，不拿別人的照片代替 -->
+      <span v-else class="teacher-card__initial" aria-hidden="true">{{ teacher.name.slice(0, 1) }}</span>
     </div>
     <div class="teacher-card__body">
       <h3>{{ teacher.name }}</h3>
-      <p class="teacher-card__specialty">{{ teacher.specialty }}</p>
+      <p v-if="teacher.specialty" class="teacher-card__specialty">{{ teacher.specialty }}</p>
       <p class="teacher-card__bio">{{ teacher.bio }}</p>
       <button type="button" @click="emit('viewCourses', teacher.name)">
         看這位老師的課
@@ -59,6 +61,18 @@ const emit = defineEmits<{
   transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+.teacher-card__initial {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  background: var(--home-cream);
+  color: var(--home-accent);
+  font-family: var(--font-serif);
+  font-size: 64px;
+  font-weight: 600;
+}
+
 .teacher-card:hover img {
   transform: scale(1.04);
 }
@@ -86,11 +100,17 @@ const emit = defineEmits<{
 }
 
 .teacher-card__bio {
+  display: -webkit-box;
   flex: 1;
   margin: 12px 0 0;
+  overflow: hidden;
   color: var(--home-muted);
   font-size: 14px;
   line-height: 1.7;
+  /* 資料庫的簡介可能很長，最多顯示四行 */
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
 }
 
 .teacher-card button {
@@ -126,7 +146,19 @@ const emit = defineEmits<{
   }
 
   .teacher-card:hover,
-  .teacher-card:hover img {
+  .teacher-card__initial {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  background: var(--home-cream);
+  color: var(--home-accent);
+  font-family: var(--font-serif);
+  font-size: 64px;
+  font-weight: 600;
+}
+
+.teacher-card:hover img {
     transform: none;
   }
 }

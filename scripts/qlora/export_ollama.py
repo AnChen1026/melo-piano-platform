@@ -9,6 +9,8 @@
     PYTHONPATH=. .scratch/qwen-lora/venv/bin/python -m scripts.qlora.export_ollama --run parser-r8
 
 訓練用 MLX 4-bit、上線用 Ollama int4，量化方式不同，匯入後要用 evaluate_ollama.py 重新驗收。
+
+注意：做出來的模型用 Ollama 的 MLX 引擎，只有 Apple Silicon Mac 能跑。要發布給組員（Windows 也能跑）用 export_gguf.py。
 """
 
 import argparse

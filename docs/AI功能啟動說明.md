@@ -149,16 +149,19 @@ docker exec python-dev-box python -c "from backend.services import llm; print(ll
 ✅ 看得到羊駝圖示，而且終端機打 `ollama list` 沒有出錯（可能是空的）就對了。
 ❌ 出現 `could not connect to ollama server` → Ollama 有裝但沒開，把 App 打開再試。
 
-### 3-2 下載模型（約 4GB，要等）
+### 3-2 下載模型（約 6.5GB，要等）
 ```bash
 ollama pull qwen3:4b-instruct-2507-q4_K_M
 ollama pull bge-m3:567m
+ollama pull hf.co/Ollie12304/melo-qwen3-4b-ft
+ollama cp hf.co/Ollie12304/melo-qwen3-4b-ft melo-qwen3-4b-ft
 ```
 
-- 第一個是千問（出題、回饋、AI 找課都用它）。
+- 第一個是千問（出題、回饋、AI 找課的聊天回覆都用它）。
 - 第二個只給 ③ AI 找課用（把課程內容轉成可以比對的數字）。
+- 第三個是我們用 QLoRA 微調過的千問 4B，只給 ③ AI 找課「整理學生需求」用。它放在 [Hugging Face](https://huggingface.co/Ollie12304/melo-qwen3-4b-ft)，Windows、Mac 都能跑。最後一行把它改成網站認得的名字。沒下載也沒關係，網站會改用規則整理需求，只是比較看不懂「一千二」「下班後」這類說法。
 
-✅ 再打 `ollama list`，兩個名字都在就對了。**名字要一模一樣**，AI 找課只認這兩個。
+✅ 再打 `ollama list`，看得到 `qwen3:4b-instruct-2507-q4_K_M`、`bge-m3:567m`、`melo-qwen3-4b-ft` 就對了。**名字要一模一樣**，網站只認這幾個。（清單裡還會有一個 `hf.co/…` 開頭的，是同一個模型，不會多占空間。）
 
 ### 3-3 讓 Ollama 讀得下長一點的教材
 - [ ] 點羊駝圖示 → **Settings**，把 **Context length** 調到 **16k**。
@@ -199,14 +202,16 @@ AI_COURSE_GATEWAY_TOKEN=貼上剛剛那串字
 LLM_PROVIDER=local
 PRACTICE_FEEDBACK_LLM_PROVIDER=local
 QUIZ_GENERATION_LLM_PROVIDER=local
+COURSE_PARSER_LLM_MODEL=melo-qwen3-4b-ft
 ```
 
 - `host.docker.internal` 是 Docker 裡「這台電腦」的意思，**照抄不要改**。
 - 三行 `PROVIDER` 都要寫 `local`：只寫 `LLM_PROVIDER` 的話，出題和回饋不會跟著換。
+- `COURSE_PARSER_LLM_MODEL` 讓 ③ AI 找課用微調模型整理需求。3-2 沒下載第三個模型的話，這行留空。
 
 存檔。
 
-✅ `.env` 裡有這 5 行，而且金鑰那行不是空的就對了。
+✅ `.env` 裡有這 6 行，而且金鑰那行不是空的就對了。
 
 ### 3-5 開閘道（開一個新的終端機視窗，**之後都不要關**）
 在專案資料夾打開**新的**終端機：
@@ -215,6 +220,7 @@ Windows（PowerShell）：
 ```powershell
 $env:AI_GATEWAY_TOKEN = (Select-String -Path .env -Pattern '^AI_COURSE_GATEWAY_TOKEN=(.*)').Matches[0].Groups[1].Value
 $env:AI_GATEWAY_TIMEOUT_SECONDS = "180"
+$env:AI_GATEWAY_CHAT_MODELS = "qwen3:4b-instruct-2507-q4_K_M,melo-qwen3-4b-ft"
 uv run uvicorn scripts.local_ai_gateway:app --host 127.0.0.1 --port 18763 --no-access-log
 ```
 
@@ -222,8 +228,11 @@ Mac：
 ```bash
 export AI_GATEWAY_TOKEN="$(grep '^AI_COURSE_GATEWAY_TOKEN=' .env | cut -d= -f2-)"
 export AI_GATEWAY_TIMEOUT_SECONDS=180
+export AI_GATEWAY_CHAT_MODELS="qwen3:4b-instruct-2507-q4_K_M,melo-qwen3-4b-ft"
 uv run uvicorn scripts.local_ai_gateway:app --host 127.0.0.1 --port 18763 --no-access-log
 ```
+
+`AI_GATEWAY_CHAT_MODELS` 是閘道允許使用的模型清單。沒列在裡面的模型，閘道會拒絕。
 
 ✅ 最後一行出現 `Uvicorn running on http://127.0.0.1:18763` 就對了。**這個視窗開著別關**（關掉 = AI 停掉）。
 
@@ -314,6 +323,17 @@ uv run python -m scripts.chat_starters --apply --confirm-database aipe04
 
 ✅ 10～30 秒內有一段回覆，下面附上提到的課程卡片就對了。可以接著問「台中有便宜一點的嗎？」或「怎麼約課？」。
 
+想確認微調模型有在用（Windows、Mac 都一樣）：
+
+```bash
+docker exec python-dev-box python -c "from backend.services.ai_course_parser import parse_conversation as p; print(p([{'role': 'user', 'content': '預算一千二，平日下班後想學爵士'}]))"
+```
+
+✅ 看到 `'max_price': 1200, 'time_slot': '平日晚上', 'search_query': '爵士'` 就對了。
+❌ 印出 `None` 代表沒用到微調模型，網站會改用規則解析。依序檢查 3-2、3-4、3-5，改完記得 `docker compose up -d --force-recreate backend`。
+
+（直接 `ollama run melo-qwen3-4b-ft` 聊天不會得到 JSON，因為它要搭配網站的系統提示詞才會照格式回答。）
+
 🎉 路線 B 完成：①②③ 都在你的電腦上跑。
 
 ---
@@ -351,6 +371,9 @@ uv run python -m scripts.chat_starters --apply --confirm-database aipe04
 | 練習回饋文字很短、像制式句子 | 沒有連到 AI，改用備用說明 | 路線 A 看 2-4、路線 B 看 3-7 |
 | AI 找課沒有反應或照一般搜尋 | 閘道、模型名稱、版本號或索引有一項沒好 | 依序檢查 3-2（名字一模一樣）、3-5、3-8、3-9 |
 | AI 找課聊天視窗沒有推薦問題 | 還沒放入推薦問題 | 做 3-9b |
+| AI 找課能用，但看不懂「一千二」「下班後」 | 沒用到微調模型，網站自動改用規則 | 檢查 3-2 有 `melo-qwen3-4b-ft`、3-4 有 `COURSE_PARSER_LLM_MODEL`、3-5 有 `AI_GATEWAY_CHAT_MODELS` |
+| `ollama pull hf.co/…` 失敗 | 網路連不到 Hugging Face | 換個網路再試；真的不行就先把 `COURSE_PARSER_LLM_MODEL` 留空 |
+| 電腦變很慢、AI 回覆等很久 | 三個模型輪流載入，記憶體不夠（8GB 會吃緊） | 先把 `COURSE_PARSER_LLM_MODEL` 清空，少載入一個模型 |
 | 改了 `.env` 好像沒用 | 後端還在用舊設定 | `docker compose up -d --force-recreate backend` |
 
 ---
@@ -382,22 +405,31 @@ uv run python -m scripts.chat_starters --apply --confirm-database aipe04
 
 ---
 
-## AI 找課改用微調過的需求解析（選做）
+## 微調模型：更新、停用、發現問題怎麼修
 
-AI 找課預設用規則整理學生的需求。也可以改用 QLoRA 微調過的千問 4B，比較看得懂「一千二」「下班後」這類說法，也會分辨學生是在找課、問平台怎麼用，還是聊無關的事。訓練過程與成果見 [開發紀錄](ai-course-finder/開發紀錄.md)。
+③ AI 找課的「整理學生需求」用的是 QLoRA 微調過的千問 4B（`melo-qwen3-4b-ft`）。比起規則，它比較看得懂「一千二」「下班後」這類說法，也會分辨學生是在找課、問平台怎麼用，還是聊無關的事。訓練過程與成果見 [開發紀錄](ai-course-finder/開發紀錄.md)。安裝已經包含在 3-2、3-4、3-5。
 
-需要 Apple Silicon 的 Mac（訓練用 MLX），以及已訓練好的權重 `.scratch/qwen-lora/runs/parser-r8/best_adapter`（沒有的話照開發紀錄 P5 重新訓練，約 1 小時）。
+**模型出新版時（大家）**：重跑 3-2 的最後兩行。`ollama pull` 會下載新版，`ollama cp` 會蓋掉舊的 `melo-qwen3-4b-ft`。網站設定不用改。
 
-1. 匯入 Ollama（約 10 分鐘，中間會用掉約 8GB 硬碟，結束會自動刪除）：
-   ```bash
-   PYTHONPATH=. .scratch/qwen-lora/venv/bin/python -m scripts.qlora.export_ollama --run parser-r8
-   ```
-   ✅ `ollama list` 看得到 `melo-qwen3-4b-ft`。
-2. 閘道開放這個模型：在 **3-5** 的指令，`uv run` 那行前面多加
-   `export AI_GATEWAY_CHAT_MODELS="qwen3:4b-instruct-2507-q4_K_M,melo-qwen3-4b-ft"`
-3. `.env` 加上 `COURSE_PARSER_LLM_MODEL=melo-qwen3-4b-ft`，然後 `docker compose up -d --force-recreate backend`。
+**暫時不想用**：把 `.env` 的 `COURSE_PARSER_LLM_MODEL` 清空，然後 `docker compose up -d --force-recreate backend`。網站會改回規則解析，其他功能不受影響。
 
-不想用了，把 `COURSE_PARSER_LLM_MODEL` 清空再重建後端即可，會回到規則解析。
+**發現 AI 找課有問題時**，先判斷是不是微調模型造成的：
+
+| 現象 | 問題在哪 | 怎麼修 |
+|---|---|---|
+| 推薦的課不相關、排序怪 | 檢索、排序（`backend/services/rag_retrieval.py`） | 改程式，一般 PR |
+| 回覆亂講、價格說錯 | 聊天回覆，用的是官方千問，不是微調模型 | 改 `backend/services/course_chat.py` 的提示詞，或換 14B（見上一節） |
+| 預算、時段、上課方式等條件抓錯，或把找課當成無關問題 | 微調模型的需求解析 | 看下面 |
+
+想確認問題是不是出在微調模型，可以先清空 `COURSE_PARSER_LLM_MODEL`，改回規則解析再測一次。如果問題還在，就跟微調模型無關。
+
+**確定是微調模型的問題時：**
+
+1. **大家都能做**：把出錯的句子和正確答案加進 `evaluations/qwen_lora/handwritten_test.jsonl`。如果是某一類說法沒學到，在 `scripts/qlora/build_dataset.py` 補上對應的片段，再送 PR。
+2. **負責訓練的人做**（需要 Apple Silicon Mac）：照開發紀錄 P5 重新訓練，約 1～2 小時。用 `scripts/qlora/evaluate.py` 和舊版比較，確認新的句子學會了，原本會的也沒有退步。
+3. **轉成 GGUF 並發布**：步驟寫在 `scripts/qlora/export_gguf.py` 的檔案開頭。腳本會做好本機模型和上傳資料夾，用 `scripts/qlora/evaluate_ollama.py` 驗收後再上傳 Hugging Face。上傳後，在群組通知大家重跑 3-2 的最後兩行。
+
+如果修正內容改了需求解析的輸出格式（`backend/course_parser_spec.py`），一定要重新訓練。新模型和後端程式要同一天發布，不然舊模型輸出的格式，新後端會不認得，網站會自動改回規則解析。
 
 ---
 

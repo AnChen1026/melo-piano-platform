@@ -26,7 +26,7 @@ def course_fields(course):
     return {
         "title": course["title"], "level": LEVELS[course["level"]],
         "style": course.get("style") or "、".join(GOALS[g] for g in course["goals"]),
-        "delivery_mode": {"online": "online", "onsite": "in_person", "hybrid": None}[course["delivery_mode"]],
+        "delivery_mode": {"online": "online", "onsite": "in_person", "hybrid": "hybrid"}[course["delivery_mode"]],
         "region": course["area"], "price_per_lesson": course["price_amount"],
         "time_slots": "、".join(SLOTS[s] for s in course["slots"]),
         "status": course["status"], "description": course_description(course),

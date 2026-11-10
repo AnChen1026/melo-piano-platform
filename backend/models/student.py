@@ -40,7 +40,7 @@ class Course(Base):
             name="ck_courses_status",
         ),
         CheckConstraint(
-            "delivery_mode IS NULL OR delivery_mode IN ('online', 'in_person')",
+            "delivery_mode IS NULL OR delivery_mode IN ('online', 'in_person', 'hybrid')",
             name="ck_courses_delivery_mode",
         ),
     )

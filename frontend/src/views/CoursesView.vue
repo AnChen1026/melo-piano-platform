@@ -6,7 +6,7 @@ import CourseDetailDialog from '@/components/home/CourseDetailDialog.vue'
 import SectionHeading from '@/components/home/SectionHeading.vue'
 import Footer from '@/components/home/Footer.vue'
 import { fetchPublishedCourses } from '@/api/courses'
-import { toCourseCard } from '@/utils/courseCard'
+import { HYBRID_LABEL, toCourseCard } from '@/utils/courseCard'
 import { courseLevels, type CourseCardData } from '@/mocks/home'
 
 // 全部課程：一次列出所有已發布課程，可用關鍵字、風格、程度、上課方式、地區、價格篩選
@@ -84,7 +84,7 @@ const filteredCourses = computed(() => {
     }
     if (filters.style && course.category !== filters.style) return false
     if (filters.level && course.level !== filters.level) return false
-    if (filters.format && course.format !== filters.format) return false
+    if (filters.format && course.format !== filters.format && course.format !== HYBRID_LABEL) return false
     if (filters.region && course.region !== filters.region) return false
     if (maxPrice !== null && (course.price === null || course.price > maxPrice)) return false
     return true

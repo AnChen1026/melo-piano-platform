@@ -29,7 +29,7 @@ GATED_NOTE = (
 )
 # 本機模型寫一段回覆要 10～30 秒
 TIMEOUT_SECONDS = 90
-DELIVERY_TEXT = {"online": "線上", "in_person": "實體"}
+DELIVERY_TEXT = {"online": "線上", "in_person": "實體", "hybrid": "線上或實體皆可"}
 # 回覆裡寫到的金額：「NT$800」「NT$ 1,200」「800 元」
 # 課名前面多看幾個字找老師名字，例如「乙老師的」
 TEACHER_LOOKBEHIND = 8
@@ -153,15 +153,16 @@ def _warnings(segments: list[str], course: Course, criteria: dict) -> list[str]:
         elif price > int(budget):
             warnings.append(f"每堂 NT$ {price:,}，超過你說的 NT$ {int(budget):,}")
     mode = criteria.get("delivery_mode")
-    # 篩選時沒填上課方式的課不排除（示範資料的「線上／實體皆可」都存成空值），這裡提醒學生確認
+    # 篩選時老師沒填上課方式的課不排除，這裡提醒學生確認；線上實體皆可的課兩種都符合
     if mode and course.delivery_mode is None:
         warnings.append(f"課程沒填上課方式，請向老師確認是否可以{DELIVERY_TEXT[mode]}上課")
-    elif mode and course.delivery_mode != mode:
+    elif mode and course.delivery_mode not in (mode, "hybrid"):
         # 模型可能把實體課說成「線上也可以」，以課程資料為準
         warnings.append(f"這門是{DELIVERY_TEXT.get(course.delivery_mode, '其他方式')}課，不是你說的{DELIVERY_TEXT[mode]}")
     region = criteria.get("region")
-    # 線上課在哪裡都能上，不用比地區
-    if region and course.delivery_mode != "online" and str(region) not in (course.region or "").replace("臺", "台"):
+    # 線上課在哪裡都能上，不用比地區；皆可的課只有學生指定實體時才比
+    can_go_online = course.delivery_mode == "online" or (course.delivery_mode == "hybrid" and mode != "in_person")
+    if region and not can_go_online and str(region) not in (course.region or "").replace("臺", "台"):
         warnings.append(f"上課地點在{course.region or '（未填）'}，不是你說的{region}")
     written = {
         int((found.group(1) or found.group(2)).replace(",", ""))

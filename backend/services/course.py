@@ -13,7 +13,8 @@ from backend.models.student import Course, ReferenceMidi
 from backend.services.student import StudentBusinessError
 
 COURSE_LEVELS = ("入門", "初階", "中階", "進階", "不確定")
-DELIVERY_MODES = ("online", "in_person")
+# hybrid：線上或實體皆可；空值只代表老師沒填
+DELIVERY_MODES = ("online", "in_person", "hybrid")
 COURSE_STATUSES = ("draft", "published", "archived")
 MAX_MIDI_BYTES = 2 * 1024 * 1024
 MIDI_SUFFIXES = (".mid", ".midi")
@@ -36,7 +37,7 @@ def check_course_fields(fields: dict) -> dict:
     if cleaned.get("level") is not None and cleaned["level"] not in COURSE_LEVELS:
         raise StudentBusinessError(status.HTTP_400_BAD_REQUEST, "找課程度只能是入門、初階、中階、進階或不確定。")
     if cleaned.get("delivery_mode") is not None and cleaned["delivery_mode"] not in DELIVERY_MODES:
-        raise StudentBusinessError(status.HTTP_400_BAD_REQUEST, "上課方式只能是線上或實體。")
+        raise StudentBusinessError(status.HTTP_400_BAD_REQUEST, "上課方式只能是線上、實體或線上實體皆可。")
     if cleaned.get("price_per_lesson") is not None and cleaned["price_per_lesson"] < 0:
         raise StudentBusinessError(status.HTTP_400_BAD_REQUEST, "單堂價格不能是負數。")
     if "status" in cleaned and cleaned["status"] not in COURSE_STATUSES:

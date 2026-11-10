@@ -207,6 +207,18 @@ def test_card_warns_when_delivery_mode_differs_from_request(db, make_user):
     assert course_chat._warnings([], in_person, {"delivery_mode": "online"}) == ["這門是實體課，不是你說的線上"]
 
 
+def test_hybrid_course_needs_no_delivery_warning(db, make_user):
+    hybrid = add_course(db, make_user("teacher"), "聊天測試皆可課", delivery_mode="hybrid", region="台北市大安區")
+
+    assert course_chat._warnings([], hybrid, {"delivery_mode": "online"}) == []
+    assert course_chat._warnings([], hybrid, {"delivery_mode": "in_person"}) == []
+    # 可以線上上，地區不同也不用提醒；學生指定實體時才比地區
+    assert course_chat._warnings([], hybrid, {"region": "台中市"}) == []
+    assert course_chat._warnings([], hybrid, {"delivery_mode": "in_person", "region": "台中市"}) == [
+        "上課地點在台北市大安區，不是你說的台中市"
+    ]
+
+
 def test_starters_return_three_random_active_questions(db):
     from backend.models.course_chat_starter import CourseChatStarter
 

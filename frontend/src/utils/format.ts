@@ -49,7 +49,13 @@ export function minuteLabel(minute: number): string {
 
 export const COURSE_LEVELS =['入門', '初階', '中階', '進階', '不確定']
 
-export const DELIVERY_LABELS: Record<string, string> = { online: '線上', in_person: '實體', 線上: '線上', 實體: '實體' }
+export const DELIVERY_LABELS: Record<string, string> = {
+  online: '線上',
+  in_person: '實體',
+  hybrid: '線上實體皆可',
+  線上: '線上',
+  實體: '實體',
+}
 
 export const COURSE_STATUS_LABELS: Record<string, string> = {
   draft: '草稿',

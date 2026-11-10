@@ -22,9 +22,9 @@ def test_both_existing_heads_upgrade_to_merged_head(migration_database):
     for previous in ("016_storage_cleanup", "016_metronome_score"):
         command.upgrade(config, previous)
         command.upgrade(config, "head")
-        assert ScriptDirectory.from_config(config).get_current_head() == "025_course_chat_starters"
+        assert ScriptDirectory.from_config(config).get_current_head() == "026_course_delivery_hybrid"
         with engine.connect() as connection:
-            assert connection.exec_driver_sql("SELECT version_num FROM alembic_version").scalar_one() == "025_course_chat_starters"
+            assert connection.exec_driver_sql("SELECT version_num FROM alembic_version").scalar_one() == "026_course_delivery_hybrid"
         inspector = inspect(engine)
         assert "storage_cleanup_jobs" in inspector.get_table_names()
         assert "availability_slots" in inspector.get_table_names()

@@ -19,7 +19,7 @@ alembic -c backend/alembic.ini history --verbose
 目前 `main` 的預期 head：
 
 ```text
-025_course_chat_starters (head)
+026_course_delivery_hybrid (head)
 ```
 
 之後一律以 `alembic heads` 的實際唯一 head 為準。兩條功能分支各自新增 Migration 造成多個 head 時，用 merge revision 合併（前例是 `017_merge_storage_audio`、`018_merge_availability_storage`）。

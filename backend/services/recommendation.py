@@ -152,9 +152,9 @@ def _apply_required_filters(statement, criteria, include_unspecified_delivery=Tr
     if criteria.get("style"):
         statement = statement.where(Course.style.is_not(None), Course.style.ilike(f"%{criteria['style']}%"))
     if criteria.get("delivery_mode"):
-        # 上課方式沒填的課（示範資料的「線上／實體皆可」都是這樣存）不排除，卡片上再提醒向老師確認；
-        # 只比對「等於」的話，學生說了線上或實體，這些課就完全找不到
-        matches = Course.delivery_mode == criteria["delivery_mode"]
+        # 線上實體皆可（hybrid）的課，學生要線上或實體都符合。
+        # 老師沒填上課方式的課（空值）預設也不排除，卡片上再提醒向老師確認
+        matches = Course.delivery_mode.in_([criteria["delivery_mode"], "hybrid"])
         statement = statement.where(
             or_(matches, Course.delivery_mode.is_(None)) if include_unspecified_delivery else matches
         )

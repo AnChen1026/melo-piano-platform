@@ -3,9 +3,13 @@ import type { CourseCardData } from '@/mocks/home'
 
 // 首頁與全部課程頁共用：把後端課程轉成課程卡需要的欄位
 
+// 線上實體皆可的課：篩選線上或實體時都要算進去
+export const HYBRID_LABEL = '線上實體皆可'
+
 export function deliveryLabel(mode: string | null): string {
   if (mode === 'online' || mode === '線上') return '線上'
   if (mode === 'in_person' || mode === '實體') return '實體'
+  if (mode === 'hybrid') return HYBRID_LABEL
   return '未填'
 }
 

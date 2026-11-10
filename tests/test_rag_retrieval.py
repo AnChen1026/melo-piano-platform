@@ -44,9 +44,10 @@ def test_delivery_filter_keeps_courses_without_delivery_mode(db, make_user):
     online = Course(teacher_id=teacher.id, title="線上", status="published", delivery_mode="online")
     unspecified = Course(teacher_id=teacher.id, title="未填", status="published", delivery_mode=None)
     in_person = Course(teacher_id=teacher.id, title="實體", status="published", delivery_mode="in_person")
-    db.add_all([online, unspecified, in_person])
+    hybrid = Course(teacher_id=teacher.id, title="皆可", status="published", delivery_mode="hybrid")
+    db.add_all([online, unspecified, in_person, hybrid])
     db.flush()
-    ids = {online.id, unspecified.id, in_person.id}
+    ids = {online.id, unspecified.id, in_person.id, hybrid.id}
 
     def matched(include):
         statement = _apply_required_filters(
@@ -54,8 +55,9 @@ def test_delivery_filter_keeps_courses_without_delivery_mode(db, make_user):
         )
         return set(db.scalars(statement))
 
-    assert matched(True) == {online.id, unspecified.id}
-    assert matched(False) == {online.id}
+    # 線上實體皆可的課一定符合；老師沒填的課預設也不排除
+    assert matched(True) == {online.id, unspecified.id, hybrid.id}
+    assert matched(False) == {online.id, hybrid.id}
 
 
 def test_mentioned_teachers_matches_name_with_or_without_suffix():

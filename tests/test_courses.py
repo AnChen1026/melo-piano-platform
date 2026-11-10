@@ -28,10 +28,11 @@ def test_老師可以修改草稿並發布(make_user, make_course, login):
 
     response = client.patch(
         f"/courses/{course.id}",
-        json={"title": "古典入門", "level": "入門", "delivery_mode": "online", "price_per_lesson": 1200},
+        json={"title": "古典入門", "level": "入門", "delivery_mode": "hybrid", "price_per_lesson": 1200},
     )
     assert response.status_code == 200, response.text
     assert response.json()["title"] == "古典入門"
+    assert response.json()["delivery_mode"] == "hybrid"
     assert response.json()["status"] == "draft"
     assert str(course.id) not in {row["id"] for row in client.get("/api/courses").json()}
 

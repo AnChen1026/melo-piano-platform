@@ -74,7 +74,7 @@
 | 用途 | 模型 |
 |---|---|
 | 比對意思（向量） | `bge-m3:567m` |
-| 整理需求（選用） | `melo-qwen3-4b-ft`（QLoRA 微調的千問 4B） |
+| 整理需求（選用） | `melo-qwen3-4b-ft`（QLoRA 微調的千問 4B，從 [Hugging Face](https://huggingface.co/Ollie12304/melo-qwen3-4b-ft) 下載） |
 | 寫回覆 | `qwen3:14b`（預設是 `qwen3:4b-instruct-2507-q4_K_M`） |
 
 換模型：`.env` 設 `COURSE_CHAT_LLM_MODEL`（回覆）或 `COURSE_PARSER_LLM_MODEL`（需求解析），閘道的 `AI_GATEWAY_CHAT_MODELS` 也要放行這個模型。啟動方式見 [AI功能啟動說明](AI功能啟動說明.md)。

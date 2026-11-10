@@ -10,4 +10,6 @@
 
 **需求解析交給 QLoRA 微調的千問 4B，失敗就退回規則。** 模型讀最近幾句對話，輸出意圖（找課／平台使用／無關）、五個硬條件（程度、上課方式、地區、預算、時段）與檢索主題 `search_query`。曲風不再當硬條件，改放進檢索主題做語意比對。規格與提示詞在 `backend/course_parser_spec.py`，訓練與網站共用同一份。設定 `COURSE_PARSER_LLM_MODEL` 才啟用，模型要在閘道的 `AI_GATEWAY_CHAT_MODELS` 開放；沒設定、閘道沒開或輸出不合規格時，改用原本的 `parse_criteria`，網站照常運作。只微調需求解析，不微調聊天回覆：前者答案明確、能量化，後者要大量人工審查。呼叫時不加 `response_format: json_object`：Ollama 的 JSON 限制解碼擋掉模型學到的第一個 token，微調模型因此多輸出欄位，合格率掉到 0%；不加時合格率 100%，格式交給 `parse_output` 嚴格檢查。訓練用 MLX 4-bit、上線用 Ollama int4，轉檔後要用上線的呼叫方式重新驗收（`scripts/qlora/evaluate_ollama.py`）。
 
+**微調模型發布成 GGUF，放在 Hugging Face。**（2026-11-10 補充）Ollama 從 safetensors 匯入的 int4 模型用 MLX 引擎，只有 Apple Silicon Mac 能跑，組員的 Windows 電腦不行。Ollama 0.40 也已經不支援 `ADAPTER`，沒辦法只發 5 MB 的 LoRA 讓大家掛在官方千問上。2.5 GB 的模型超過 GitHub 單一檔案和 Release 附件的上限，所以改用 llama.cpp 轉成 GGUF Q4_K_M（`scripts/qlora/export_gguf.py`），公開放在 `hf.co/Ollie12304/melo-qwen3-4b-ft`。組員用 `ollama pull` 下載，再用 `ollama cp` 改成 `melo-qwen3-4b-ft`，後端設定不必改。HF repo 附上官方千問 instruct 的 Go 模板，不然 Ollama 會套用思考版模板，回覆前多出 `</think>`。
+
 **推薦問題存資料庫，用網站的檢索驗證。** `course_chat_starters`（migration 025）存 30 句人工審過的開場問題與每句的驗證結果；`scripts/chat_starters.py` 用網站實際的檢索跑過，沒過的自動停用。API 從找課、條件組合、平台使用三類各挑一句。課程或索引改過要重跑驗證。

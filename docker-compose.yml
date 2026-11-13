@@ -22,6 +22,8 @@ services:
         condition: service_healthy # 確保資料庫「健康檢查通過」後端才啟動
     env_file:
       - .env # 自動讀取外層的 .env 環境變數
+    extra_hosts:
+      - "host.docker.internal=172.18.240.1"
     networks:
       - app-network
     restart: unless-stopped # 程式崩潰或 Docker 重開時自動重啟；手動 docker stop 的不會被叫回來

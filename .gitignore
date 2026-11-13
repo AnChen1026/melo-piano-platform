@@ -65,3 +65,6 @@ frontend/*.tsbuildinfo
 
 # 本機上傳的檔案（錄音、MIDI、教材、圖片）
 uploads/
+
+# opencode settings
+opencode.jsonc

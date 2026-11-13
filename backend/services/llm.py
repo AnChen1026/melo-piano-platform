@@ -197,7 +197,7 @@ def _call_local(api_key, model, system_instruction, content, timeout, temperatur
                 "temperature": max(0.0, min(1.0, temperature)),
                 "max_tokens": LOCAL_MAX_TOKENS,
                 # 千問 3.5 這類「會先思考」的模型，思考會把 1400 token 用光、正文變成空的；關掉思考直接回答
-                "reasoning_effort": "none",
+                # "reasoning_effort": "none",
                 "messages": [
                     {"role": "system", "content": system_instruction},
                     {"role": "user", "content": content},
